@@ -4,6 +4,9 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>BlazorDashboardFramework</Title>
+    <Description>A framework for creating customizable dashboards in Blazor.</Description>
   </PropertyGroup>
 
 
