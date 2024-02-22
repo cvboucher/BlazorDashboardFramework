@@ -1,13 +1,9 @@
 ﻿@implements IDisposable
 
 <div class="column @Column.StyleClass @GetEditModeClass()" style="height: 100%;" >
-        
-    @if (Column.Rows != null && Column.Rows.Any())
+    @if (Column.Rows.Any())
     {
-        @foreach (var row in Column.Rows)
-        {
-            <BdfRow Row="@row" RowStyle="@GetRowStyle()" />
-        }
+        <BdfRows Value="@Column.Rows"  />
     }
     else if (editModeService.EditMode)
     {
@@ -68,11 +64,6 @@
     {
         editModeService.EditModeChanged -= OnEditModeChanged;
         Column.WidgetsChanged -= OnWidgetsChanged;
-    }
-
-    private string GetRowStyle()
-    {
-        return IsPreview ? $"height: {100 / Column.Rows.Count()}%;" : string.Empty;
     }
 
     private async Task DeleteWidgetInstance(WidgetInstance widgetInstance)

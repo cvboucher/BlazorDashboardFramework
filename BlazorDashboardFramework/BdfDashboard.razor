@@ -32,10 +32,7 @@
     </span>
 </h1>
 <CascadingValue Value="Value">
-    @foreach (var row in Value.Rows)
-    {
-        <BdfRow Row="@row" />
-    }
+    <BdfRows Value="@Value.Rows" />
 </CascadingValue>
 }
 

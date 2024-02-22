@@ -1,0 +1,21 @@
+﻿@foreach (var row in Value)
+{
+    <div class="row @row.StyleClass" style="@GetRowStyle()">
+        @foreach (var col in row.Columns)
+        {
+            <BdfColumn Column="@col" IsPreview="@IsPreview" />
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public List<Row> Value { get; set; } = default!;
+    //[Parameter] public EventCallback<List<Row>> ValueChanged { get; set; }
+    //[Parameter] public string? RowStyle { get; set; }
+    [Parameter] public bool IsPreview { get; set; } = false;
+
+    private string GetRowStyle()
+    {
+        return IsPreview ? $"height: {100 / Value.Count()}%;" : string.Empty;
+    }
+}
