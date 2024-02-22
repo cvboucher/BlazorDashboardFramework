@@ -1,0 +1,15 @@
+﻿<div class="layout-preview">
+    <div class="text-center title" style="width: 100%">@dashboard.Title</div>
+    @foreach (var row in dashboard.Rows)
+    {
+        <BdfRow Row="@row" IsPreview="true" RowStyle="@GetRowStyle()" />
+    }
+</div>
+@code {
+    [Parameter, EditorRequired] public Dashboard dashboard { get; set; } = default!;
+
+    private string GetRowStyle()
+    {
+        return $"height: {100 / dashboard.Rows.Count()}%;";
+    }
+}

@@ -1,0 +1,148 @@
+﻿@using System.Text.Json
+@implements IDisposable
+@if (Value != null)
+{
+<h1 class="dashboard-header">
+    <span class="dashboard-tile">@Value.Title</span>
+    <span class="float-end">
+        @if (editModeService.EditMode)
+        {
+            <a href="" title="Add new widget" @onclick="@AddNewWidget" @onclick:preventDefault>
+                <i class="@AddWidgetIconCss"></i>
+            </a>
+            <a href="" title="Edit dashboard" @onclick="@EditDashboard" @onclick:preventDefault>
+                <i class="@EditDashbaordIconCss"></i>
+            </a>
+            <a href="" title="Save dashboard" @onclick="@SaveChanges" @onclick:preventDefault>
+                <i class="@SaveDashboardIconCss"></i>
+            </a>
+            <a href="" title="Delete this dashboard" @onclick="@DeleteDashboard" @onclick:preventDefault>
+                <i class="@DeleteDashboardIconCss"></i>
+            </a>
+            <a href="" title="Cancel changes" @onclick="@CancelChanges" @onclick:preventDefault>
+                <i class="@CancelChangesIconCss"></i>
+            </a>
+        }
+        else
+        {
+            <a href="" title="Enable edit mode" @onclick="@EnableEditMode" @onclick:preventDefault>
+                <i class="@EditModeIconCss"></i>
+            </a>
+        }
+    </span>
+</h1>
+<CascadingValue Value="Value">
+    @foreach (var row in Value.Rows)
+    {
+        <BdfRow Row="@row" />
+    }
+</CascadingValue>
+}
+
+
+@code {
+    [CascadingParameter] IModalService Modal { get; set; } = default!;
+
+    [Parameter, EditorRequired] public Dashboard? Value { get; set; } = default!;
+    [Parameter] public EventCallback<Dashboard> ValueChanged { get; set; }
+    [Parameter] public string AddWidgetIconCss { get; set; } = "bi bi-plus-square";
+    [Parameter] public string EditDashbaordIconCss { get; set; } = "bi bi-gear";
+    [Parameter] public string SaveDashboardIconCss { get; set; } = "bi bi-save";
+    [Parameter] public string DeleteDashboardIconCss { get; set; } = "bi bi-trash";
+    [Parameter] public string CancelChangesIconCss { get; set; } = "bi bi-x-square";
+    [Parameter] public string EditModeIconCss { get; set; } = "bi bi-pencil-square";
+    [Parameter] public EventCallback<Dashboard> OnDashboardSaved { get; set; }
+    [Parameter] public EventCallback<Dashboard> OnDashboardDeleted { get; set; }
+    [Parameter] public EventCallback<Dashboard> OnEditMode { get; set; }
+    [Parameter] public EventCallback<Dashboard> OnEditModeCancelled { get; set; }
+
+    [Inject] public EditModeService editModeService { get; set; } = default!;
+
+
+    private string? dashboardJson;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        editModeService.EditModeChanged += OnEditModeChanged;
+    }
+
+    private async void OnEditModeChanged(object? sender, EventArgs e)
+    {
+        await InvokeAsync(() => StateHasChanged());
+    }
+
+    public async Task AddNewWidget()
+    {
+        if (Value == null)
+            return;
+        try
+        {
+            var widgetSelectorModal = Modal.Show<BdfWidgetSelector>("Add New Widget");
+            var result = await widgetSelectorModal.Result;
+            if (result.Confirmed && result.Data is Widget)
+            {
+                var widget = (Widget)result.Data;
+                Value.FindFirstColumn()?.Widgets.Insert(0, widget.GetInstance());
+            }
+        }
+        catch (Exception ex)
+        {
+            //toast.ShowError(ex.Message);
+        }
+    }
+
+    public async Task EditDashboard()
+    {
+        try
+        {
+            var options = new ModalOptions()
+                {
+                    Size = ModalSize.Large
+                };
+            var parameters = new ModalParameters()
+                .Add(nameof(Dashboard), Value);
+            var modal = Modal.Show<BdfDashboardForm>("Edit Dashboard", parameters, options);
+            var result = await modal.Result;
+        }
+        catch (Exception ex)
+        {
+            //toast.ShowError(ex.Message);
+        }
+    }
+
+    public async Task SaveChanges()
+    {
+        editModeService.EditMode = false;
+        await OnDashboardSaved.InvokeAsync(Value);
+    }
+
+    public async Task DeleteDashboard()
+    {
+        await OnDashboardDeleted.InvokeAsync(Value);
+    }
+
+    public async Task CancelChanges()
+    {
+        editModeService.EditMode = false;
+        if (!string.IsNullOrWhiteSpace(dashboardJson))
+            Value = JsonSerializer.Deserialize<Dashboard>(dashboardJson)
+                ?? new Dashboard();
+        await OnEditModeCancelled.InvokeAsync(Value);
+        await ValueChanged.InvokeAsync(Value);
+    }
+
+    public async Task EnableEditMode()
+    {
+        await OnEditMode.InvokeAsync(Value);
+        if (Value != null)
+            dashboardJson = JsonSerializer.Serialize<Dashboard>(Value);
+        editModeService.EditMode = true;
+    }
+       
+
+    public void Dispose()
+    {
+        editModeService.EditModeChanged -= OnEditModeChanged;
+    }
+}

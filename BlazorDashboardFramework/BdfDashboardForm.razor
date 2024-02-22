@@ -1,0 +1,42 @@
+﻿<EditForm Model="@Dashboard">
+    <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <input type="text" class="form-control" id="title" aria-describedby="title" @bind-value="@Dashboard.Title">
+    </div>
+    <div class="row mb-3">
+    <InputRadioGroup Name="layout" @bind-Value="@Dashboard.Layout">
+        <label for="layout" class="form-label">Title</label>
+        @foreach (var kvp in layoutService.Layouts)
+        {
+                <div class="col-md-1 mb-3">
+                    <InputRadio Name="layout" Value="kvp.Key" class="float-end" />
+                </div>
+                <div class="col-md-5 mb-3 @(kvp.Key == Dashboard.Layout ? "selected" : string.Empty)">
+                    <BdfLayoutPreview dashboard="@kvp.Value" />
+                </div>
+            
+        }
+    </InputRadioGroup>
+    </div>
+    <button type="submit" class="btn btn-primary" @onclick="OnCloseClicked">Close</button>
+</EditForm>
+
+@code {
+    [Parameter, EditorRequired] public Dashboard Dashboard { get; set; } = default!;
+    //[Parameter] public EventCallback<Dashboard> DashboardChanged { get; set; } = default!;
+    [CascadingParameter] BlazoredModalInstance modalInstance { get; set; } = default!;
+    [Inject] LayoutService layoutService { get; set; } = default!;
+    private string? currentLayout;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        currentLayout = Dashboard.Layout;
+    }
+
+    private async Task OnCloseClicked()
+    {
+        //await DashboardChanged.InvokeAsync(Dashboard);
+        await modalInstance.CloseAsync(ModalResult.Ok());
+    }
+}

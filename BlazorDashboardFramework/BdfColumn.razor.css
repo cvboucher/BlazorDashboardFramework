@@ -1,0 +1,14 @@
+﻿.column.edit {
+    /*min-height: 120px;*/
+    border: 1px dashed #ccc;
+    /*padding-top: 15px;*/
+    border-radius: 5px;
+}
+.layout-preview .column {
+    border: 1px dashed #ccc;
+    height: 100%;
+    background-color: #eee;
+}
+
+
+
