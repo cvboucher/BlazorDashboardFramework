@@ -25,6 +25,13 @@ namespace BlazorDashboardFramework.Services
             Layouts.Add(TwelveThreeSixThreeTwelveStructure.Title, TwelveThreeSixThreeTwelveStructure);
         }
 
+        public Dashboard GetDefaultLayout()
+        {
+            var layout = ThreeNineTwelveFourFourFourStructure;
+            return Dashboard.GetFromJson(layout.GetJson()) ??
+                throw new Exception("Default layout not found.");
+        }
+
         public Dashboard? GetFirstOrDefault()
         {
             return Layouts.Values.FirstOrDefault();

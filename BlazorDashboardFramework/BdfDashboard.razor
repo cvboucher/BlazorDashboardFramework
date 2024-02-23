@@ -40,7 +40,7 @@
 @code {
     [CascadingParameter] IModalService Modal { get; set; } = default!;
 
-    [Parameter, EditorRequired] public Dashboard? Value { get; set; } = default!;
+    [Parameter] public Dashboard? Value { get; set; } = default!;
     [Parameter] public EventCallback<Dashboard> ValueChanged { get; set; }
     [Parameter] public string AddWidgetIconCss { get; set; } = "bi bi-plus-square";
     [Parameter] public string EditDashbaordIconCss { get; set; } = "bi bi-gear";
@@ -52,8 +52,10 @@
     [Parameter] public EventCallback<Dashboard> OnDashboardDeleted { get; set; }
     [Parameter] public EventCallback<Dashboard> OnEditMode { get; set; }
     [Parameter] public EventCallback<Dashboard> OnEditModeCancelled { get; set; }
+    [Parameter] public string? DefaultLayout { get; set; }
 
     [Inject] public EditModeService editModeService { get; set; } = default!;
+    [Inject] public LayoutService layoutService { get; set; } = default!;
 
 
     private string? dashboardJson;
@@ -62,6 +64,15 @@
     {
         base.OnInitialized();
         editModeService.EditModeChanged += OnEditModeChanged;
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Value == null && !string.IsNullOrWhiteSpace(DefaultLayout))
+            Value = layoutService.GetLayout(DefaultLayout);
+        if (Value == null)
+            Value = layoutService.GetDefaultLayout();
     }
 
     private async void OnEditModeChanged(object? sender, EventArgs e)

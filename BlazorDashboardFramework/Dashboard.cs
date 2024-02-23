@@ -10,7 +10,7 @@ namespace BlazorDashboardFramework
     public class Dashboard
     {
         public Guid DashboardId { get; set; } = Guid.NewGuid();
-        public string Layout { get; set; } = "3-9 (12/4-4-4)";
+        public string Layout { get; set; } = "1";
         public bool ReadOnly { get; set; }
         public string Title { get; set; } = "Title";
         public List<Row> Rows { get; set; } = new();
@@ -20,8 +20,10 @@ namespace BlazorDashboardFramework
             return JsonSerializer.Serialize(this);
         }
 
-        public static Dashboard? GetFromJson(string json)
+        public static Dashboard? GetFromJson(string? json)
         {
+            if (string.IsNullOrWhiteSpace(json))
+                return null;
             return JsonSerializer.Deserialize<Dashboard>(json);
         }
 
