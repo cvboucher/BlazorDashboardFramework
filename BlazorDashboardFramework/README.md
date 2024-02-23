@@ -1,0 +1,1 @@
+﻿Requires adding Bootstrap and Bootstrap-Icons to your project.
