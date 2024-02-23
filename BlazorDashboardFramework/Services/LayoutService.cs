@@ -27,24 +27,21 @@ namespace BlazorDashboardFramework.Services
 
         public Dashboard GetDefaultLayout()
         {
-            var layout = ThreeNineTwelveFourFourFourStructure;
-            return Dashboard.GetFromJson(layout.GetJson()) ??
+            return ThreeNineTwelveFourFourFourStructure?.DeepCopy() ??
                 throw new Exception("Default layout not found.");
         }
 
         public Dashboard? GetFirstOrDefault()
         {
-            return Layouts.Values.FirstOrDefault();
+            return Layouts.Values.FirstOrDefault()?.DeepCopy();
         }
 
         public Dashboard? GetLayout(string title)
         {
-            var layout = Layouts.Values.FirstOrDefault(x => title.Equals(x.Title, StringComparison.OrdinalIgnoreCase));
-            return layout == null
-                ? null
-                : JsonSerializer.Deserialize<Dashboard>(JsonSerializer.Serialize(layout));
+            return Layouts.Values
+                .FirstOrDefault(x => title.Equals(x.Title, StringComparison.OrdinalIgnoreCase))?
+                .DeepCopy();
         }
-
 
         private Dashboard SixSixStructure = new Dashboard()
         {

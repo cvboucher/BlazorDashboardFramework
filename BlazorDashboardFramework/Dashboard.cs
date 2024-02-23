@@ -15,17 +15,6 @@ namespace BlazorDashboardFramework
         public string Title { get; set; } = "Title";
         public List<Row> Rows { get; set; } = new();
 
-        public string GetJson()
-        {
-            return JsonSerializer.Serialize(this);
-        }
-
-        public static Dashboard? GetFromJson(string? json)
-        {
-            if (string.IsNullOrWhiteSpace(json))
-                return null;
-            return JsonSerializer.Deserialize<Dashboard>(json);
-        }
 
         public void MoveWidget(int oldIndex, int newIndex, string fromId, string toId)
         {
