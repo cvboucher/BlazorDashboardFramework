@@ -2,6 +2,7 @@
 using BlazorDashboardFramework.Widgets;
 using Blazored.Modal;
 using Microsoft.Extensions.DependencyInjection;
+using Plk.Blazor.DragDrop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,11 +25,12 @@ namespace BlazorDashboardFramework
         {
 
             services.AddBlazoredModal();
+            services.AddBlazorDragDrop();
 
             services.AddSingleton<ClockWidgetService>();
             services.AddScoped<EditModeService>();
             services.AddSingleton<LayoutService>();
-            services.AddSingleton<WidgetService>();
+            services.AddSingleton<WidgetTypeService>();
 
             return services;
         }

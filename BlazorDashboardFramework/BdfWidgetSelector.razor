@@ -1,5 +1,5 @@
 ﻿<div class="list-group">
-    @foreach (var widget in widgetService.Widgets.Values)
+    @foreach (var widget in widgetService.WidgetTypes.Values)
     {
         <button type="button" class="list-group-item list-group-item-action" @onclick="() => SelectWidget(widget)">
             <h3>@widget.Title</h3>
@@ -12,10 +12,10 @@
 </div>
 
 @code {
-    [Inject] public WidgetService widgetService { get; set; } = default!;
+    [Inject] public WidgetTypeService widgetService { get; set; } = default!;
     [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
 
-    private async Task SelectWidget(Widget widget)
+    private async Task SelectWidget(WidgetType widget)
     {
         await BlazoredModal.CloseAsync(ModalResult.Ok(widget));
     }

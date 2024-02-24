@@ -1,9 +1,9 @@
-﻿@implements IDisposable
+﻿@* @implements IDisposable
 
 <div class="column @Column.StyleClass @GetEditModeClass()"  >
     @if (Column.Rows.Any())
     {
-        <BdfRows Value="@Column.Rows"  />
+        <BdfRows Rows="@Column.Rows"  />
     }
     else if (editModeService.EditMode)
     {
@@ -113,3 +113,4 @@
         await InvokeAsync(() => StateHasChanged()); 
     }
 }
+ *@

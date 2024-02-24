@@ -1,0 +1,127 @@
+﻿@implements IDisposable
+@foreach (var column in Columns)
+{
+    <div class="column @column.StyleClass @GetEditModeClass()">
+        @if (column.Rows.Any())
+        {
+            <BdfRows @bind-Rows="@column.Rows" IsPreview="@IsPreview" />
+        }
+        else if (editModeService.EditMode)
+        {
+            <Dropzone Items="column.Widgets" Id="@column.ColumnId">
+                <div style="width: 100%;">
+                    <BdfWidget Widget="@context" OnDeleteWidget="@(() => DeleteWidgetInstance(column, context))" />
+                </div>
+            </Dropzone>
+            @* <SortableList Group="bdf"
+                          Items="column.Widgets"
+                          Context="widget"
+                          OnRemove="OnRemoveWidget"
+                          OnUpdate="OnUpdateWidget"
+                          Handle=".drag-handle"
+                          Id="@column.ColumnId">
+                <SortableItemTemplate>
+                    <div style="width: 100%;">
+                        <BdfWidget Widget="@widget" OnDeleteWidget="@(() => DeleteWidgetInstance(column, widget))" />
+                    </div>
+                </SortableItemTemplate>
+            </SortableList> *@
+        }
+        else
+        {
+            @foreach (var widget in column.Widgets)
+            {
+                <BdfWidget Widget="@widget" />
+            }
+        }
+    </div>
+}
+
+@code {
+    [CascadingParameter] Dashboard dashboard { get; set; } = default!;
+    [Parameter, EditorRequired] public List<Column> Columns { get; set; } = default!;
+    [Parameter] public EventCallback<List<Column>> ColumnsChanged { get; set; }
+    [Parameter] public bool IsPreview { get; set; } = false;
+    [Inject] public EditModeService editModeService { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        editModeService.EditModeChanged += OnEditModeChanged;
+        //Column.WidgetsChanged += OnWidgetsChanged;
+    }
+
+    private async void OnEditModeChanged(object? sender, EventArgs e)
+    {
+        await ColumnsChanged.InvokeAsync(Columns);
+        await InvokeAsync(() => StateHasChanged());
+    }
+
+    private async void OnWidgetsChanged(object? sender, List<WidgetInstance> e)
+    {
+        await InvokeAsync(() => StateHasChanged());
+    }
+
+    private string GetEditModeClass()
+    {
+        return editModeService.EditMode ? "edit" : string.Empty;
+    }
+
+    public void Dispose()
+    {
+        editModeService.EditModeChanged -= OnEditModeChanged;
+        //Column.WidgetsChanged -= OnWidgetsChanged;
+    }
+
+    private async Task DeleteWidgetInstance(Column column, WidgetInstance widgetInstance)
+    {
+        var instance = column.Widgets.FirstOrDefault(x => x.WidgetInstanceId == widgetInstance.WidgetInstanceId);
+        if (instance != null)
+        {
+            column.Widgets.Remove(instance);
+            await ColumnsChanged.InvokeAsync(Columns);
+        }
+    }
+
+    private async void OnRemoveWidget((int oldIndex, int newIndex, string fromId, string toId) indices)
+    {
+        // // get the item at the old index in list 1
+        // var item = items1[indices.oldIndex];
+
+        // // add it to the new index in list 2
+        // items2.Insert(indices.newIndex, item);
+
+        // // remove the item from the old index in list 1
+        // items1.Remove(items1[indices.oldIndex]);
+        dashboard.MoveWidget(indices.oldIndex, indices.newIndex, indices.fromId, indices.toId);
+        await ColumnsChanged.InvokeAsync(Columns);
+        //await InvokeAsync(() => StateHasChanged());
+    }
+
+    private async void OnUpdateWidget((int oldIndex, int newIndex, string fromId, string toId) indices)
+    {
+        // // deconstruct the tuple
+        // var (oldIndex, newIndex) = indices;
+
+        // var items = this.items;
+        // var itemToMove = items[oldIndex];
+        // items.RemoveAt(oldIndex);
+
+        // if (newIndex < items.Count)
+        // {
+        //     items.Insert(newIndex, itemToMove);
+        // }
+        // else
+        // {
+        //     items.Add(itemToMove);
+        // }
+        dashboard.MoveWidget(indices.oldIndex, indices.newIndex, indices.fromId, indices.toId);
+        await ColumnsChanged.InvokeAsync(Columns);
+        //await InvokeAsync(() => StateHasChanged());
+    }
+
+    // private string GetRowStyle()
+    // {
+    //     return IsPreview ? $"height: {100 / Columns.Count()}%;" : string.Empty;
+    // }
+}

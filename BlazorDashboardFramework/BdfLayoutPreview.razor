@@ -1,9 +1,6 @@
 ﻿<div class="layout-preview">
     <div class="text-center title" style="width: 100%">@dashboard.Title</div>
-    @foreach (var row in dashboard.Rows)
-    {
-        <BdfRow Row="@row" IsPreview="true" RowStyle="@GetRowStyle()" />
-    }
+    <BdfRows Rows="dashboard.Rows" IsPreview="true" />
 </div>
 @code {
     [Parameter, EditorRequired] public Dashboard dashboard { get; set; } = default!;

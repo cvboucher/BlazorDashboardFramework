@@ -1,7 +1,7 @@
 ﻿@implements IDisposable
 @if (!Widget.HideWidget)
 {
-    <div class="card mb-3">
+    <div class="card mt-1 mb-3">
         @if (!Widget.HideHeader || editModeService.EditMode)
         {
             <div class="card-header hover-container">
@@ -41,13 +41,18 @@
 }
 
 @code {
+    [CascadingParameter] IModalService Modal { get; set; } = default!;
+
     [Parameter, EditorRequired] public WidgetInstance Widget { get; set; } = default!;
     [Parameter] public EventCallback<WidgetInstance> WidgetChanged { get; set; }
     [Parameter] public EventCallback<WidgetInstance> OnDeleteWidget { get; set; }
+    //[Parameter, EditorRequired] public Column Column { get; set; } = default!;
+
     [Inject] public EditModeService editModeService { get; set; } = default!;
-    [Inject] public WidgetService widgetService { get; set; } = default!;
+    [Inject] public WidgetTypeService widgetService { get; set; } = default!;
+
     private Dictionary<string, object> dynamicComponentParameters { get; set; } = new();
-    private Widget? widgetType;
+    private WidgetType? widgetType;
 
 
     protected override void OnInitialized()
@@ -65,7 +70,7 @@
             //dynamicComponentParameters.Add("WidgetChanged", EventCallback.Factory.Create<WidgetInstance>(this, WidgetInstanceChanged));
         }
 
-        widgetType = widgetService.GetWidget(Widget.Type);
+        widgetType = widgetService.GetWidgetType(Widget.Type);
     }
 
     private async Task WidgetInstanceChanged(WidgetInstance widgetInstance)
@@ -88,7 +93,7 @@
         }
         catch (Exception ex)
         {
-            //toast.ShowError(ex.Message);
+            Console.WriteLine($"{nameof(ReloadWidgetContent)}: {ex}");
         }
     }
 
@@ -102,13 +107,15 @@
     {
         try
         {
-            await Task.Delay(0);
+            var parameters = new ModalParameters()
+                .Add(nameof(WidgetInstance), Widget);
+            var modal = Modal.Show<BdfWidgetConfigForm>($"Edit {Widget.Title}", parameters);
+            await modal.Result;
             await WidgetChanged.InvokeAsync(Widget);
-            throw new NotImplementedException();
         }
         catch (Exception ex)
         {
-            //toast.ShowError(ex.Message);
+            Console.WriteLine($"{nameof(EditWidgetConfiguration)}: {ex}");
         }
     }
 
@@ -120,7 +127,7 @@
         }
         catch (Exception ex)
         {
-            //toast.ShowError(ex.Message);
+            Console.WriteLine($"{nameof(RemoveWidget)}: {ex}");
         }
     }
 

@@ -1,21 +1,26 @@
-﻿@foreach (var row in Value)
+﻿@foreach (var row in Rows)
 {
     <div class="row @row.StyleClass" style="@GetRowStyle()">
-        @foreach (var col in row.Columns)
+        <BdfColumns @bind-Columns="row.Columns" IsPreview="@IsPreview" />
+        @* @for (var i = 0; i < row.Columns.Count; i++)
         {
-            <BdfColumn Column="@col" IsPreview="@IsPreview" />
-        }
+            <BdfColumn @bind-Column="@row.Columns[i]" IsPreview="@IsPreview" />
+        } *@
+        @* @foreach (var col in row.Columns)
+        {
+            <BdfColumn @bind-Column="@col" IsPreview="@IsPreview" />
+        } *@
     </div>
 }
 
 @code {
-    [Parameter, EditorRequired] public List<Row> Value { get; set; } = default!;
-    //[Parameter] public EventCallback<List<Row>> ValueChanged { get; set; }
+    [Parameter, EditorRequired] public List<Row> Rows { get; set; } = default!;
+    [Parameter] public EventCallback<List<Row>> RowsChanged { get; set; }
     //[Parameter] public string? RowStyle { get; set; }
     [Parameter] public bool IsPreview { get; set; } = false;
 
     private string GetRowStyle()
     {
-        return IsPreview ? $"height: {100 / Value.Count()}%;" : string.Empty;
+        return IsPreview ? $"height: {100 / Rows.Count()}%;" : string.Empty;
     }
 }

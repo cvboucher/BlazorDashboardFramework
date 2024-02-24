@@ -1,0 +1,68 @@
+﻿@using System.Text.Json
+<EditForm EditContext="editContext" 
+          OnValidSubmit="OnValidSubmitClicked" 
+          class="form">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <div class="mb-3">
+        <label class="form-label">Title</label>
+        <InputText @bind-Value=@WidgetInstance.Title
+                   class="form-control" />
+    </div>
+    @if (widgetType != null && widgetType.ConfigComponent != null && dynamicComponentParameters != null)
+    {
+        <DynamicComponent Type="widgetType.ConfigComponent" Parameters="dynamicComponentParameters" />
+    }
+    <div class="float-end">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary" @onclick="OnCancelClicked">Cancel</button>
+    </div>
+</EditForm>
+
+@code {
+    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
+    [Parameter] public WidgetInstance WidgetInstance { get; set; } = default!;
+
+    [Inject] public WidgetTypeService widgetTypeService { get; set; } = default!;
+
+    private EditContext editContext = default!;
+    private WidgetType? widgetType;
+    private object? configObject;
+    private Dictionary<string, object> dynamicComponentParameters = default!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        try
+        {
+            widgetType = widgetTypeService.GetWidgetType(WidgetInstance.Type)
+            ?? throw new Exception($"WidgetType {WidgetInstance.Type} not found.");
+            if (widgetType.ConfigType == null)
+                return;
+            configObject = widgetType.GetConfig(WidgetInstance.Config);
+            editContext = new EditContext(configObject ?? WidgetInstance);
+            if (configObject != null)
+                dynamicComponentParameters = new Dictionary<string, object>()
+                {
+                    { "Config", configObject}
+                };
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private void OnValidSubmitClicked()
+    {
+        if (configObject != null)
+            WidgetInstance.Config = JsonSerializer.Serialize(configObject);
+        BlazoredModal.CloseAsync(ModalResult.Ok(WidgetInstance));
+    }
+
+    private void OnCancelClicked()
+    {
+        BlazoredModal.CancelAsync();
+    }
+}

@@ -32,7 +32,7 @@
     </span>
 </h1>
 <CascadingValue Value="Value">
-    <BdfRows Value="@Value.Rows" />
+    <BdfRows @bind-Rows="@Value.Rows" />
 </CascadingValue>
 }
 
@@ -88,9 +88,9 @@
         {
             var widgetSelectorModal = Modal.Show<BdfWidgetSelector>("Add New Widget");
             var result = await widgetSelectorModal.Result;
-            if (result.Confirmed && result.Data is Widget)
+            if (result.Confirmed && result.Data is WidgetType)
             {
-                var widget = (Widget)result.Data;
+                var widget = (WidgetType)result.Data;
                 Value.FindFirstColumn()?.Widgets.Insert(0, widget.GetInstance());
             }
         }
