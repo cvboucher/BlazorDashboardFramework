@@ -32,7 +32,7 @@
     </span>
 </h1>
 <CascadingValue Value="Value">
-    <BdfRows @bind-Rows="@Value.Rows" />
+    <BdfRows Rows="@Value.Rows" />
 </CascadingValue>
 }
 
@@ -50,8 +50,8 @@
     [Parameter] public string EditModeIconCss { get; set; } = "bi bi-pencil-square";
     [Parameter] public EventCallback<Dashboard> OnDashboardSaved { get; set; }
     [Parameter] public EventCallback<Dashboard> OnDashboardDeleted { get; set; }
-    [Parameter] public EventCallback<Dashboard> OnEditMode { get; set; }
-    [Parameter] public EventCallback<Dashboard> OnEditModeCancelled { get; set; }
+    // [Parameter] public EventCallback<Dashboard> OnEditMode { get; set; }
+    // [Parameter] public EventCallback<Dashboard> OnEditModeCancelled { get; set; }
     [Parameter] public string? DefaultLayout { get; set; }
 
     [Inject] public EditModeService editModeService { get; set; } = default!;
@@ -96,7 +96,7 @@
         }
         catch (Exception ex)
         {
-            //toast.ShowError(ex.Message);
+            Console.WriteLine($"{nameof(AddNewWidget)}: {ex}");
         }
     }
 
@@ -115,7 +115,7 @@
         }
         catch (Exception ex)
         {
-            //toast.ShowError(ex.Message);
+            Console.WriteLine($"{nameof(EditDashboard)}: {ex}");
         }
     }
 
@@ -136,13 +136,14 @@
         if (!string.IsNullOrWhiteSpace(dashboardJson))
             Value = JsonSerializer.Deserialize<Dashboard>(dashboardJson)
                 ?? new Dashboard();
-        await OnEditModeCancelled.InvokeAsync(Value);
+        //await OnEditModeCancelled.InvokeAsync(Value);
         await ValueChanged.InvokeAsync(Value);
     }
 
     public async Task EnableEditMode()
     {
-        await OnEditMode.InvokeAsync(Value);
+        await Task.Delay(0);
+        //await OnEditMode.InvokeAsync(Value);
         if (Value != null)
             dashboardJson = JsonSerializer.Serialize<Dashboard>(Value);
         editModeService.EditMode = true;

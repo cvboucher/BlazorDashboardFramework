@@ -1,0 +1,19 @@
+﻿@foreach (var row in Rows)
+{
+    @if (row.Columns.Any())
+    {
+        <div class="row @row.StyleClass" style="@RowStyle()">
+            <BdfLayoutColumns Columns="@row.Columns" />
+        </div>
+    }
+    
+}
+
+@code {
+    [Parameter, EditorRequired] public List<Row> Rows { get; set; } = default!;
+
+    private string RowStyle()
+    {
+        return $"height: {100 / Rows.Count()}%;";
+    }
+}

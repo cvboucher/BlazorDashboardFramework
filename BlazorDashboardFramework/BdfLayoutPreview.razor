@@ -1,6 +1,6 @@
 ﻿<div class="layout-preview">
     <div class="text-center title" style="width: 100%">@dashboard.Title</div>
-    <BdfRows Rows="dashboard.Rows" IsPreview="true" />
+    <BdfLayoutRows Rows="dashboard.Rows" />
 </div>
 @code {
     [Parameter, EditorRequired] public Dashboard dashboard { get; set; } = default!;

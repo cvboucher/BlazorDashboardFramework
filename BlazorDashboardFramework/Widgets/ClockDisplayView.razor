@@ -1,8 +1,7 @@
 ﻿@implements IDisposable
 @implements IContentComponent
 @rendermode InteractiveAuto
-<h3 class="text-center">@clockWidgetService.CurrentDateTime.ToString($"{clockConfig?.Format ?? "T"}")</h3>
-
+<div class="text-center fs-3">@clockWidgetService.CurrentDateTime.ToString(GetClockFormat())</div>
 @code {
     [Parameter] public WidgetInstance Widget { get; set; } = default!;
     [Inject] ClockWidgetService clockWidgetService { get; set; } = default!;
@@ -16,26 +15,35 @@
         clockWidgetService.CurrentDateTimeChanged += OnCurrentDateTimeChanged;
     }
 
+    private string GetClockFormat()
+    {
+        return string.IsNullOrWhiteSpace(clockConfig?.Format)
+            ? "T"
+            : clockConfig.Format;
+    }
+
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
+        await Refresh();
+    }
+
+    public async Task Refresh()
+    {
+        await Task.Delay(0);
         if (string.IsNullOrWhiteSpace(Widget.Config))
             return;
         var widgetType = widgetTypeService.GetWidgetType(Widget.Type);
         if (widgetType != null)
             clockConfig = widgetType.GetConfig(Widget.Config) as ClockConfig;
-        //Widget.HideHeader = true;
+        Widget.HideHeader = clockConfig?.HideHeader ?? false;
     }
 
     private async void OnCurrentDateTimeChanged(object? sender, DateTime e)
     {
         await InvokeAsync(() => StateHasChanged());
     }
-
-    public void Refresh()
-    {
-
-    }
+      
 
     public void Dispose()
     {

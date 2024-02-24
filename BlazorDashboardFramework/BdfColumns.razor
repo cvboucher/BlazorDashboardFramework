@@ -4,13 +4,15 @@
     <div class="column @column.StyleClass @GetEditModeClass()">
         @if (column.Rows.Any())
         {
-            <BdfRows @bind-Rows="@column.Rows" IsPreview="@IsPreview" />
+            <BdfRows Rows="@column.Rows" />
         }
         else if (editModeService.EditMode)
         {
             <Dropzone Items="column.Widgets" Id="@column.ColumnId">
                 <div style="width: 100%;">
-                    <BdfWidget Widget="@context" OnDeleteWidget="@(() => DeleteWidgetInstance(column, context))" />
+                    <BdfWidget @bind-Widget="@context" 
+                               OnDeleteWidget="@(() => DeleteWidgetInstance(column, context))"
+                               OnCopyWidget="@(() => CopyWidgetInstance(column, context))"/>
                 </div>
             </Dropzone>
             @* <SortableList Group="bdf"
@@ -41,7 +43,7 @@
     [CascadingParameter] Dashboard dashboard { get; set; } = default!;
     [Parameter, EditorRequired] public List<Column> Columns { get; set; } = default!;
     [Parameter] public EventCallback<List<Column>> ColumnsChanged { get; set; }
-    [Parameter] public bool IsPreview { get; set; } = false;
+    //[Parameter] public bool IsPreview { get; set; } = false;
     [Inject] public EditModeService editModeService { get; set; } = default!;
 
     protected override void OnInitialized()
@@ -80,6 +82,22 @@
         {
             column.Widgets.Remove(instance);
             await ColumnsChanged.InvokeAsync(Columns);
+        }
+    }
+
+    private async Task CopyWidgetInstance(Column column, WidgetInstance widgetInstance)
+    {
+        var instance = column.Widgets.FirstOrDefault(x => x.WidgetInstanceId == widgetInstance.WidgetInstanceId);
+        if (instance != null)
+        {
+            var index = column.Widgets.IndexOf(instance);
+            var copy = instance.DeepCopy();
+            if (copy != null)
+            {
+                copy.WidgetInstanceId = Guid.NewGuid().ToString();
+                column.Widgets.Insert(index, copy);
+                await ColumnsChanged.InvokeAsync(Columns);
+            }
         }
     }
 

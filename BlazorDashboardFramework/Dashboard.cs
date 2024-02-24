@@ -12,7 +12,7 @@ namespace BlazorDashboardFramework
         public Guid DashboardId { get; set; } = Guid.NewGuid();
         public string Layout { get; set; } = "1";
         public bool ReadOnly { get; set; }
-        public string Title { get; set; } = "Title";
+        public string? Title { get; set; }
         public List<Row> Rows { get; set; } = new();
 
 
@@ -97,5 +97,7 @@ namespace BlazorDashboardFramework
             }
             return null;
         }
+
+
     }
 }

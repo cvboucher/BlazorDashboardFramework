@@ -5,12 +5,6 @@
     border-radius: 5px;
 }
 
-.layout-preview .column {
-    border: 1px dashed #ccc;
-    height: 100%;
-    background-color: #eee;
-}
-
 ::deep .plk-dd-dropzone {
     height: 100%;
 }

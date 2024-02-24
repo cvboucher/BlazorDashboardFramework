@@ -7,9 +7,9 @@
             <div class="card-header hover-container">
                 @(Widget.Title)
                 <div class="float-end hover-effect fs-6">
-                    <a href="" class="ms-1" title="Reload widget content" @onclick="@ReloadWidgetContent" @onclick:preventDefault>
+                    @* <a href="" class="ms-1" title="Reload widget content" @onclick="@ReloadWidgetContent" @onclick:preventDefault>
                         <i class="bi bi-arrow-clockwise"></i>
-                    </a>
+                    </a> *@
                     @if (editModeService.EditMode)
                     {
                         <a href="" class="ms-1 drag-handle" title="Change widget location">
@@ -21,6 +21,9 @@
                     </a>
                     @if (editModeService.EditMode)
                     {
+                        <a href="" class="ms-1" title="Copy Widget" @onclick="@CopyWidget" @onclick:preventDefault>
+                            <i class="bi bi-copy"></i>
+                        </a>
                         <a href="" class="ms-1" title="Edit widget configuration" @onclick="@EditWidgetConfiguration" @onclick:preventDefault>
                             <i class="bi bi-gear-fill"></i>
                         </a>
@@ -34,7 +37,7 @@
         @if (!Widget.Collapsed && widgetType != null)
         {
             <div class="card-body">
-                <p><DynamicComponent Type="@widgetType.ContentComponent" Parameters="@dynamicComponentParameters" /></p>
+                <DynamicComponent Type="@widgetType.ContentComponent" Parameters="@dynamicComponentParameters"  />
             </div>
         }
     </div>
@@ -46,6 +49,7 @@
     [Parameter, EditorRequired] public WidgetInstance Widget { get; set; } = default!;
     [Parameter] public EventCallback<WidgetInstance> WidgetChanged { get; set; }
     [Parameter] public EventCallback<WidgetInstance> OnDeleteWidget { get; set; }
+    [Parameter] public EventCallback<WidgetInstance> OnCopyWidget { get; set; }
     //[Parameter, EditorRequired] public Column Column { get; set; } = default!;
 
     [Inject] public EditModeService editModeService { get; set; } = default!;
@@ -124,6 +128,18 @@
         try
         {
             await OnDeleteWidget.InvokeAsync(Widget);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"{nameof(RemoveWidget)}: {ex}");
+        }
+    }
+
+    public async Task CopyWidget()
+    {
+        try
+        {
+            await OnCopyWidget.InvokeAsync(Widget);
         }
         catch (Exception ex)
         {

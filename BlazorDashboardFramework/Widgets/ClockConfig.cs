@@ -10,5 +10,6 @@ namespace BlazorDashboardFramework.Widgets
     public class ClockConfig
     {
         public string? Format { get; set; }
+        public bool HideHeader { get; set; }
     }
 }

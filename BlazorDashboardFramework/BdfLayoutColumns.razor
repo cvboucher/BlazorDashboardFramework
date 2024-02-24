@@ -1,0 +1,10 @@
+﻿@foreach (var column in Columns)
+{
+    <div class="column @column.StyleClass">
+        <BdfLayoutRows Rows="@column.Rows" />
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public List<Column> Columns { get; set; } = default!;
+}

@@ -2,6 +2,10 @@
     <label class="form-label">Format</label>
     <InputText @bind-Value="@Config.Format" class="form-control" />
 </div>
+<div class="mb-3 form-check">
+    <InputCheckbox @bind-Value="@Config.HideHeader" class="form-check-input" id="hideHeadercheckbox" />
+    <label class="form-check-label" for="hideHeaderCheckbox">Hide Header</label>
+</div>
 
 @code {
     [Parameter] public ClockConfig Config { get; set; } = default!;

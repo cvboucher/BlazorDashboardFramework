@@ -5,7 +5,7 @@
     </div>
     <div class="row mb-3">
     <InputRadioGroup Name="layout" @bind-Value="@Dashboard.Layout">
-        <label for="layout" class="form-label">Title</label>
+        <label for="layout" class="form-label">Layout (@Dashboard.Layout)</label>
         @foreach (var kvp in layoutService.Layouts)
         {
                 <div class="col-md-1 mb-3">
