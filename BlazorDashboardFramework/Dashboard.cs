@@ -98,6 +98,45 @@ namespace BlazorDashboardFramework
             return null;
         }
 
+        public Queue<List<WidgetInstance>> GetAllWidgets()
+        {
+            var queue = new Queue<List<WidgetInstance>>();
+            foreach (var row in this.Rows)
+                GetAllWidgets(queue, row.Columns);
+            return queue;
+        }
+
+        private Queue<List<WidgetInstance>> GetAllWidgets(Queue<List<WidgetInstance>> queue, List<Column> columns)
+        {
+            foreach (var column in columns)
+            {
+                if (column.Rows.Any())
+                    foreach (var row in column.Rows)
+                        GetAllWidgets(queue, row.Columns);
+                else
+                    queue.Enqueue(column.Widgets);
+            }
+            return queue;
+        }
+
+        public void PopulateWidgets(Queue<List<WidgetInstance>> queue)
+        {
+            while (queue.Any())
+                foreach (var row in this.Rows)
+                    PopulateWidgets(queue, row.Columns);
+        }
+
+        public void PopulateWidgets(Queue<List<WidgetInstance>> queue, List<Column> columns)
+        {
+            foreach (var column in columns)
+            {
+                if (column.Rows.Any())
+                    foreach (var row in column.Rows)
+                        PopulateWidgets(queue, row.Columns);
+                else if (queue.Any())
+                    column.Widgets = queue.Dequeue();
+            }
+        }
 
     }
 }

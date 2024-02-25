@@ -36,6 +36,16 @@
 
     private async Task OnCloseClicked()
     {
+        if(string.IsNullOrWhiteSpace(currentLayout) || !currentLayout.Equals(Dashboard.Layout))
+        {
+            var existingWidgets = Dashboard.GetAllWidgets();
+            var newLayout = layoutService.GetLayout(Dashboard.Layout);
+            if (newLayout != null)
+            {
+                newLayout.PopulateWidgets(existingWidgets);
+                Dashboard.Rows = newLayout.Rows;
+            }
+        }
         //await DashboardChanged.InvokeAsync(Dashboard);
         await modalInstance.CloseAsync(ModalResult.Ok());
     }
