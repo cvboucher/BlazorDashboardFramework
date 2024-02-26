@@ -61,17 +61,17 @@
 
     protected override void OnInitialized()
     {
-        base.OnInitialized();
         editModeService.EditModeChanged += OnEditModeChanged;
+        base.OnInitialized();
     }
 
     protected override void OnParametersSet()
     {
-        base.OnParametersSet();
         if (widgetType == null)
             widgetType = widgetTypeService.GetWidgetType(Widget.Type);
         if (widgetParameters == null)
             LoadWidgetParameters();
+        base.OnParametersSet();
     }
 
     private void LoadWidgetParameters()

@@ -45,14 +45,12 @@
     [CascadingParameter] Dashboard dashboard { get; set; } = default!;
     [Parameter, EditorRequired] public List<Column> Columns { get; set; } = default!;
     [Parameter] public EventCallback<List<Column>> ColumnsChanged { get; set; }
-    //[Parameter] public bool IsPreview { get; set; } = false;
     [Inject] public EditModeService editModeService { get; set; } = default!;
 
     protected override void OnInitialized()
     {
-        base.OnInitialized();
         editModeService.EditModeChanged += OnEditModeChanged;
-        //Column.WidgetsChanged += OnWidgetsChanged;
+        base.OnInitialized();
     }
 
     private async void OnEditModeChanged(object? sender, EventArgs e)
@@ -74,7 +72,6 @@
     public void Dispose()
     {
         editModeService.EditModeChanged -= OnEditModeChanged;
-        //Column.WidgetsChanged -= OnWidgetsChanged;
     }
 
     private async Task DeleteWidgetInstance(Column column, WidgetInstance widgetInstance)

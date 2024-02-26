@@ -62,17 +62,17 @@
 
     protected override void OnInitialized()
     {
-        base.OnInitialized();
         editModeService.EditModeChanged += OnEditModeChanged;
+        base.OnInitialized();
     }
 
     protected override void OnParametersSet()
     {
-        base.OnParametersSet();
         if (Value == null && !string.IsNullOrWhiteSpace(DefaultLayout))
             Value = layoutService.GetLayout(DefaultLayout);
         if (Value == null)
             Value = layoutService.GetDefaultLayout();
+        base.OnParametersSet();
     }
 
     private async void OnEditModeChanged(object? sender, EventArgs e)

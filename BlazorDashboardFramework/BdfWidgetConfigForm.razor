@@ -33,7 +33,6 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        await base.OnParametersSetAsync();
         try
         {
             widgetType = widgetTypeService.GetWidgetType(WidgetInstance.Type)
@@ -52,6 +51,7 @@
         {
             Console.WriteLine(ex.Message);
         }
+        await base.OnParametersSetAsync();
     }
 
     private void OnValidSubmitClicked()

@@ -8,7 +8,7 @@ Sortable 1.*
 
 Add <CascadingBlazoredModal> around <Router>
 
-Predefined layouts are available in LayoutService.Layouts.  Add additional Layouts to LayoutService.Layouts.
+Predefined layouts are available in LayoutService.Layouts.  You can define and add additional Layouts to LayoutService.Layouts.
 Add additional WidgetTypes to WidgetTypeService.WidgetTypes
 
 If a WidgetType has a ConfigType, the DisplayComponent and EditComponent must have a paramater named Config with that type.
