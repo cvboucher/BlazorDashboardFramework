@@ -12,13 +12,19 @@ namespace BlazorDashboardFramework
         required public string Type { get; set; }
         required public string Title { get; set; }
         public string? Description { get; set; }
+        required public Type DisplayComponent { get; set; }
+        public Type? EditComponent { get; set; }
+        public Type? ConfigType { get; set; }
         public string? Config { get; set; }
         public bool HideWidget { get; set; }
+        public bool SetHideWidgetEventCallback { get; set; }
         public bool HideHeader { get; set; }
+        public bool SetHideHeaderEventCallback { get; set; }
+        public bool ToggleHideHeaderEventCallback { get; set; }
         public bool Collapsed { get; set; }
-        required public Type ContentComponent { get; set; }
-        public Type? ConfigComponent { get; set; }
-        public Type? ConfigType { get; set; }
+        public bool SetCollapsedEventCallback { get; set; }
+        public bool ToggleCollapsedEventCallback { get; set; }
+        
 
         public WidgetInstance GetInstance()
         {

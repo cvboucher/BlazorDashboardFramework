@@ -19,9 +19,11 @@ namespace BlazorDashboardFramework.Services
                 Type = "clock",
                 Title = "Clock",
                 Description = "Displays the current time.",
-                ContentComponent = typeof(ClockDisplayView),
-                ConfigComponent = typeof(ClockConfigView),
+                DisplayComponent = typeof(ClockDisplayView),
+                EditComponent = typeof(ClockEditView),
                 ConfigType = typeof(ClockConfig),
+                SetCollapsedEventCallback = true,
+                SetHideHeaderEventCallback = true,
             };
             WidgetTypes.Add(clockWidget.Type, clockWidget);
         }
@@ -29,6 +31,14 @@ namespace BlazorDashboardFramework.Services
         public WidgetType? GetWidgetType(string type)
         {
             return WidgetTypes.Values.FirstOrDefault(x => type.Equals(x.Type, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public object? GetWidgetInstanceConfig(string type, string? configJson)
+        {
+            var widgetType = GetWidgetType(type);
+            if (widgetType == null)
+                return null;
+            return widgetType.GetConfig(configJson);
         }
 
     }

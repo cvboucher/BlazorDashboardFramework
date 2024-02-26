@@ -6,28 +6,40 @@ using System.Threading.Tasks;
 
 namespace BlazorDashboardFramework.Widgets
 {
-    public class ClockWidgetService : IDisposable
+    public class ClockWidgetService : IAsyncDisposable
     {
 
-        private System.Timers.Timer clockTimer;
+        private readonly Task timerTask;
+        private readonly PeriodicTimer timer;
+        private readonly CancellationTokenSource cts = new();
         public DateTime CurrentDateTime = DateTime.Now;
         public event EventHandler<DateTime>? CurrentDateTimeChanged;
         public ClockWidgetService()
         {
-            clockTimer = new System.Timers.Timer(1000);
-            clockTimer.Elapsed += UpdateClock;
-            clockTimer.Enabled = true;
-
-        }
-        private void UpdateClock(Object? source, System.Timers.ElapsedEventArgs e)
-        {
-            CurrentDateTime = DateTime.Now;
-            CurrentDateTimeChanged?.Invoke(this, CurrentDateTime);
+            timer = new PeriodicTimer(TimeSpan.FromMilliseconds(1000));
+            timerTask = DoWorkAsync();
         }
 
-        public void Dispose()
+        private async Task DoWorkAsync()
         {
-            clockTimer.Elapsed -= UpdateClock;
+            try
+            {
+                while (await timer.WaitForNextTickAsync(cts.Token))
+                {
+                    CurrentDateTime = DateTime.Now;
+                    CurrentDateTimeChanged?.Invoke(this, CurrentDateTime);
+                }
+            }
+            catch (OperationCanceledException) { }
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (timerTask is null)
+                return;
+            cts.Cancel();
+            await timerTask;
+            cts.Dispose();
         }
     }
 }

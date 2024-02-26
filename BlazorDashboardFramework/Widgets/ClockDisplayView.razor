@@ -1,13 +1,15 @@
 ﻿@implements IDisposable
-@implements IContentComponent
-@rendermode InteractiveAuto
-<div class="text-center fs-3">@clockWidgetService.CurrentDateTime.ToString(GetClockFormat())</div>
+<div class="text-center fs-2">@clockWidgetService.CurrentDateTime.ToString(GetClockFormat())</div>
 @code {
-    [Parameter] public WidgetInstance Widget { get; set; } = default!;
+    [Parameter] public ClockConfig Config { get; set; } = default!;
+    [Parameter] public EventCallback<bool> SetCollapsed { get; set; }
+    [Parameter] public EventCallback<bool> SetHideHeader { get; set; }
+    [Parameter] public EventCallback<bool> SetHideWidget { get; set; }
+    [Parameter] public EventCallback ToggleCollapsed { get; set; }
+    [Parameter] public EventCallback ToggleHideHeader { get; set; }
     [Inject] ClockWidgetService clockWidgetService { get; set; } = default!;
-    [Inject] WidgetTypeService widgetTypeService { get; set; } = default!;
 
-    private ClockConfig? clockConfig;
+    private bool ranOnce;
 
     protected override void OnInitialized()
     {
@@ -17,26 +19,19 @@
 
     private string GetClockFormat()
     {
-        return string.IsNullOrWhiteSpace(clockConfig?.Format)
+        return string.IsNullOrWhiteSpace(Config?.Format)
             ? "T"
-            : clockConfig.Format;
+            : Config.Format;
     }
 
     protected override async Task OnParametersSetAsync()
     {
         await base.OnParametersSetAsync();
-        await Refresh();
-    }
-
-    public async Task Refresh()
-    {
-        await Task.Delay(0);
-        if (string.IsNullOrWhiteSpace(Widget.Config))
-            return;
-        var widgetType = widgetTypeService.GetWidgetType(Widget.Type);
-        if (widgetType != null)
-            clockConfig = widgetType.GetConfig(Widget.Config) as ClockConfig;
-        Widget.HideHeader = clockConfig?.HideHeader ?? false;
+        if (!ranOnce)
+        {
+            ranOnce = true;
+            await SetHideHeader.InvokeAsync(Config.HideHeader);
+        }
     }
 
     private async void OnCurrentDateTimeChanged(object? sender, DateTime e)
@@ -44,10 +39,8 @@
         await InvokeAsync(() => StateHasChanged());
     }
       
-
     public void Dispose()
     {
         clockWidgetService.CurrentDateTimeChanged -= OnCurrentDateTimeChanged;
     }
-
 }

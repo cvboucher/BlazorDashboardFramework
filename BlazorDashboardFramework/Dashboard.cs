@@ -121,21 +121,25 @@ namespace BlazorDashboardFramework
 
         public void PopulateWidgets(Queue<List<WidgetInstance>> queue)
         {
+            if (!this.Rows.Any())
+                return;
             while (queue.Any())
-                foreach (var row in this.Rows)
-                    PopulateWidgets(queue, row.Columns);
+                PopulateWidgets(queue, this.Rows);
         }
 
-        public void PopulateWidgets(Queue<List<WidgetInstance>> queue, List<Column> columns)
+        private void PopulateWidgets(Queue<List<WidgetInstance>> queue, List<Row> rows)
+        {
+            foreach (var row in rows)
+                PopulateWidgets(queue, row.Columns);
+        }
+
+        private void PopulateWidgets(Queue<List<WidgetInstance>> queue, List<Column> columns)
         {
             foreach (var column in columns)
-            {
                 if (column.Rows.Any())
-                    foreach (var row in column.Rows)
-                        PopulateWidgets(queue, row.Columns);
+                    PopulateWidgets(queue, column.Rows);
                 else if (queue.Any())
-                    column.Widgets = queue.Dequeue();
-            }
+                    column.Widgets.AddRange(queue.Dequeue());
         }
 
     }

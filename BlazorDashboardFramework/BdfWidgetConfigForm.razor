@@ -9,9 +9,9 @@
         <InputText @bind-Value=@WidgetInstance.Title
                    class="form-control" />
     </div>
-    @if (widgetType != null && widgetType.ConfigComponent != null && dynamicComponentParameters != null)
+    @if (widgetType != null && widgetType.EditComponent != null && dynamicComponentParameters != null)
     {
-        <DynamicComponent Type="widgetType.ConfigComponent" Parameters="dynamicComponentParameters" />
+        <DynamicComponent Type="widgetType.EditComponent" Parameters="dynamicComponentParameters" />
     }
     <div class="float-end">
         <button type="submit" class="btn btn-primary">Save</button>

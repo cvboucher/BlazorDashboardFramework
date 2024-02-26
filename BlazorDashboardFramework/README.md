@@ -6,11 +6,18 @@ Bootstrap 5.*
 Bootstrap-Icons 1.*
 Sortable 1.*
 
-Add additional Layouts to LayoutService.Layouts.
+Add <CascadingBlazoredModal> around <Router>
+
+Predefined layouts are available in LayoutService.Layouts.  Add additional Layouts to LayoutService.Layouts.
 Add additional WidgetTypes to WidgetTypeService.WidgetTypes
 
-Every ContentComponent must have the following parameter:
-[Parameter] public WidgetInstance Widget { get; set; } = default!;
+If a WidgetType has a ConfigType, the DisplayComponent and EditComponent must have a paramater named Config with that type.
+[Parameter] public (type of ConfigType) Config { get; set; } = default!;
 
-Every ConfigComponent must have the following parameter:
-[Parameter] public ClockConfig Config { get; set; } = default!;
+For each of the following EventCallback properties in WidgetType, you must have a corresponding EventCallback property in your DisplayComponent.  Set the property to true if you will be providing that EventCallback in your Display component.
+SetHideWidgetEventCallback - [Parameter] public EventCallback<bool> SetHideWidget { get; set; }
+SetHideHeaderEventCallback - [Parameter] public EventCallback<bool> SetHideHeader { get; set; }
+ToggleHideHeaderEventCallback - [Parameter] public EventCallback ToggleHideHeader { get; set; }
+SetCollapsedEventCallback - [Parameter] public EventCallback<bool> SetCollapsed { get; set; }
+ToggleCollapsedEventCallback - [Parameter] public EventCallback ToggleCollapsed { get; set; }
+

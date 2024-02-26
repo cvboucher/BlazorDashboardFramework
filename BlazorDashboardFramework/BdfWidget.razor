@@ -1,5 +1,5 @@
 ﻿@implements IDisposable
-@if (!Widget.HideWidget)
+@if (!Widget.HideWidget || editModeService.EditMode)
 {
     <div class="card mt-1 mb-3">
         @if (!Widget.HideHeader || editModeService.EditMode)
@@ -34,10 +34,10 @@
                 </div>
             </div>
         }
-        @if (!Widget.Collapsed && widgetType != null)
+        @if (widgetParameters != null && !Widget.Collapsed && widgetType != null)
         {
             <div class="card-body">
-                <DynamicComponent Type="@widgetType.ContentComponent" Parameters="@dynamicComponentParameters"  />
+                <DynamicComponent Type="@widgetType.DisplayComponent" Parameters="widgetParameters" />
             </div>
         }
     </div>
@@ -50,12 +50,12 @@
     [Parameter] public EventCallback<WidgetInstance> WidgetChanged { get; set; }
     [Parameter] public EventCallback<WidgetInstance> OnDeleteWidget { get; set; }
     [Parameter] public EventCallback<WidgetInstance> OnCopyWidget { get; set; }
-    //[Parameter, EditorRequired] public Column Column { get; set; } = default!;
 
     [Inject] public EditModeService editModeService { get; set; } = default!;
-    [Inject] public WidgetTypeService widgetService { get; set; } = default!;
+    [Inject] public WidgetTypeService widgetTypeService { get; set; } = default!;
 
-    private Dictionary<string, object> dynamicComponentParameters { get; set; } = new();
+    private Dictionary<string, object>? widgetParameters;
+
     private WidgetType? widgetType;
 
 
@@ -68,13 +68,79 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        if (!dynamicComponentParameters.ContainsKey("Widget"))
-        {
-            dynamicComponentParameters.Add("Widget", Widget);
-            //dynamicComponentParameters.Add("WidgetChanged", EventCallback.Factory.Create<WidgetInstance>(this, WidgetInstanceChanged));
-        }
+        if (widgetType == null)
+            widgetType = widgetTypeService.GetWidgetType(Widget.Type);
+        if (widgetParameters == null)
+            LoadWidgetParameters();
+    }
 
-        widgetType = widgetService.GetWidgetType(Widget.Type);
+    private void LoadWidgetParameters()
+    {
+        if (Widget == null || widgetType == null)
+            return;
+        widgetParameters = new Dictionary<string, object>();
+        var config = widgetType.GetConfig(Widget?.Config);
+        if (config != null)
+            widgetParameters.Add("Config", config);
+        if (widgetType.SetHideHeaderEventCallback)
+            widgetParameters.Add("SetHideHeader", EventCallback.Factory.Create<bool>(this, OnSetHideHeader));
+        if (widgetType.ToggleHideHeaderEventCallback)
+            widgetParameters.Add("ToggleHideHeader", EventCallback.Factory.Create(this, OnToggleHideHeader));
+        if (widgetType.SetCollapsedEventCallback)
+            widgetParameters.Add("SetCollapsed", EventCallback.Factory.Create<bool>(this, OnSetCollapsed));
+        if (widgetType.ToggleCollapsedEventCallback)
+            widgetParameters.Add("ToggleCollapsed", EventCallback.Factory.Create(this, OnToggleCollapsed));
+        if (widgetType.SetHideWidgetEventCallback)
+            widgetParameters.Add("SetHideWidget", EventCallback.Factory.Create<bool>(this, OnSetHideWidget));
+    }
+
+    // public Dictionary<string, object> GetDynamicComponentParameters()
+    // {
+    //     var parameters = new Dictionary<string, object>();
+    //     if (widgetType != null)
+    //     {
+    //         var config = widgetType.GetConfig(Widget?.Config);
+    //         if (config != null)
+    //             parameters.Add("Config", config);
+    //         if (widgetType.SetHideHeaderEventCallback)
+    //             parameters.Add("SetHideHeader", EventCallback.Factory.Create<bool>(this, OnSetHideHeader));
+    //         if (widgetType.ToggleHideHeaderEventCallback)
+    //             parameters.Add("ToggleHideHeader", EventCallback.Factory.Create(this, OnToggleHideHeader));
+    //         if (widgetType.SetCollapsedEventCallback)
+    //             parameters.Add("SetCollapsed", EventCallback.Factory.Create<bool>(this, OnSetCollapsed));
+    //         if (widgetType.ToggleCollapsedEventCallback)
+    //             parameters.Add("ToggleCollapsed", EventCallback.Factory.Create(this, OnToggleCollapsed));
+    //         if (widgetType.SetHideWidgetEventCallback)
+    //             parameters.Add("SetHideWidget", EventCallback.Factory.Create<bool>(this, OnSetHideWidget));
+
+
+    //     }
+    //     return parameters;
+    // }
+
+    private void OnSetCollapsed(bool collapsed)
+    {
+        Widget.Collapsed = collapsed;
+    }
+
+    private void OnSetHideHeader(bool hideHeader)
+    {
+        Widget.HideHeader = hideHeader;
+    }
+
+    private void OnToggleHideHeader()
+    {
+        Widget.HideHeader = !Widget.HideHeader;
+    }
+
+    private void OnSetHideWidget(bool hideWidget)
+    {
+        Widget.HideWidget = hideWidget;
+    }
+
+    private void OnToggleCollapsed()
+    {
+        Widget.Collapsed = !Widget.Collapsed;
     }
 
     private async Task WidgetInstanceChanged(WidgetInstance widgetInstance)
@@ -114,8 +180,12 @@
             var parameters = new ModalParameters()
                 .Add(nameof(WidgetInstance), Widget);
             var modal = Modal.Show<BdfWidgetConfigForm>($"Edit {Widget.Title}", parameters);
-            await modal.Result;
-            await WidgetChanged.InvokeAsync(Widget);
+            var result = await modal.Result;
+            if (result.Confirmed)
+            {
+                LoadWidgetParameters();
+                await WidgetChanged.InvokeAsync(Widget);
+            }
         }
         catch (Exception ex)
         {
