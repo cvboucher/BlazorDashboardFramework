@@ -43,9 +43,14 @@
     </div>
 }
 
-@code {
-    [CascadingParameter] IModalService Modal { get; set; } = default!;
+@if (editModeService.EditMode)
+{
+    <BdfWidgetConfigForm WidgetInstance="@Widget" 
+                         @ref="@bdfWidgetConfigForm" 
+                         WidgetInstanceChanged="OnWidgetInstanceChanged" />
+}
 
+@code {
     [Parameter, EditorRequired] public WidgetInstance Widget { get; set; } = default!;
     [Parameter] public EventCallback<WidgetInstance> WidgetChanged { get; set; }
     [Parameter] public EventCallback<WidgetInstance> OnDeleteWidget { get; set; }
@@ -55,7 +60,7 @@
     [Inject] public WidgetTypeService widgetTypeService { get; set; } = default!;
 
     private Dictionary<string, object>? widgetParameters;
-
+    private BdfWidgetConfigForm? bdfWidgetConfigForm;
     private WidgetType? widgetType;
 
 
@@ -72,6 +77,12 @@
         if (widgetParameters == null)
             LoadWidgetParameters();
         base.OnParametersSet();
+    }
+
+    private void OnWidgetInstanceChanged(WidgetInstance widgetInstance)
+    {
+        Widget = widgetInstance;
+        LoadWidgetParameters();
     }
 
     private void LoadWidgetParameters()
@@ -93,30 +104,6 @@
         if (widgetType.SetHideWidgetEventCallback)
             widgetParameters.Add("SetHideWidget", EventCallback.Factory.Create<bool>(this, OnSetHideWidget));
     }
-
-    // public Dictionary<string, object> GetDynamicComponentParameters()
-    // {
-    //     var parameters = new Dictionary<string, object>();
-    //     if (widgetType != null)
-    //     {
-    //         var config = widgetType.GetConfig(Widget?.Config);
-    //         if (config != null)
-    //             parameters.Add("Config", config);
-    //         if (widgetType.SetHideHeaderEventCallback)
-    //             parameters.Add("SetHideHeader", EventCallback.Factory.Create<bool>(this, OnSetHideHeader));
-    //         if (widgetType.ToggleHideHeaderEventCallback)
-    //             parameters.Add("ToggleHideHeader", EventCallback.Factory.Create(this, OnToggleHideHeader));
-    //         if (widgetType.SetCollapsedEventCallback)
-    //             parameters.Add("SetCollapsed", EventCallback.Factory.Create<bool>(this, OnSetCollapsed));
-    //         if (widgetType.ToggleCollapsedEventCallback)
-    //             parameters.Add("ToggleCollapsed", EventCallback.Factory.Create(this, OnToggleCollapsed));
-    //         if (widgetType.SetHideWidgetEventCallback)
-    //             parameters.Add("SetHideWidget", EventCallback.Factory.Create<bool>(this, OnSetHideWidget));
-
-
-    //     }
-    //     return parameters;
-    // }
 
     private void OnSetCollapsed(bool collapsed)
     {
@@ -175,22 +162,8 @@
 
     public async Task EditWidgetConfiguration()
     {
-        try
-        {
-            var parameters = new ModalParameters()
-                .Add(nameof(WidgetInstance), Widget);
-            var modal = Modal.Show<BdfWidgetConfigForm>($"Edit {Widget.Title}", parameters);
-            var result = await modal.Result;
-            if (result.Confirmed)
-            {
-                LoadWidgetParameters();
-                await WidgetChanged.InvokeAsync(Widget);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"{nameof(EditWidgetConfiguration)}: {ex}");
-        }
+        if (bdfWidgetConfigForm != null)
+            await bdfWidgetConfigForm.Open();
     }
 
     public async Task RemoveWidget()

@@ -35,11 +35,13 @@
     <BdfRows Rows="@Value.Rows" />
 </CascadingValue>
 }
-
+@if (editModeService.EditMode)
+{
+    <BdfDashboardForm @bind-Dashboard="@Value" @ref="@bdfDashboardForm" />
+    <BdfWidgetSelector @ref="@bdfWidgetSelector" WidgetTypeSelected="AddSelectedWidget" />
+}
 
 @code {
-    [CascadingParameter] IModalService Modal { get; set; } = default!;
-
     [Parameter] public Dashboard? Value { get; set; } = default!;
     [Parameter] public EventCallback<Dashboard> ValueChanged { get; set; }
     [Parameter] public string AddWidgetIconCss { get; set; } = "bi bi-plus-square";
@@ -50,13 +52,13 @@
     [Parameter] public string EditModeIconCss { get; set; } = "bi bi-pencil-square";
     [Parameter] public EventCallback<Dashboard> OnDashboardSaved { get; set; }
     [Parameter] public EventCallback<Dashboard> OnDashboardDeleted { get; set; }
-    // [Parameter] public EventCallback<Dashboard> OnEditMode { get; set; }
-    // [Parameter] public EventCallback<Dashboard> OnEditModeCancelled { get; set; }
     [Parameter] public string? DefaultLayout { get; set; }
 
     [Inject] public EditModeService editModeService { get; set; } = default!;
     [Inject] public LayoutService layoutService { get; set; } = default!;
 
+    private BdfDashboardForm? bdfDashboardForm { get; set; }
+    private BdfWidgetSelector? bdfWidgetSelector { get; set; }
 
     private string? dashboardJson;
 
@@ -82,41 +84,20 @@
 
     public async Task AddNewWidget()
     {
-        if (Value == null)
-            return;
-        try
-        {
-            var widgetSelectorModal = Modal.Show<BdfWidgetSelector>("Add New Widget");
-            var result = await widgetSelectorModal.Result;
-            if (result.Confirmed && result.Data is WidgetType)
-            {
-                var widget = (WidgetType)result.Data;
-                Value.FindFirstColumn()?.Widgets.Insert(0, widget.GetInstance());
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"{nameof(AddNewWidget)}: {ex}");
-        }
+        if (bdfWidgetSelector != null && Value != null)
+            await bdfWidgetSelector.Open();
+    }
+
+    private async Task AddSelectedWidget(WidgetType widgetType)
+    {
+        await Task.Delay(0);
+        Value?.FindFirstColumn()?.Widgets.Insert(0, widgetType.GetInstance());
     }
 
     public async Task EditDashboard()
     {
-        try
-        {
-            var options = new ModalOptions()
-                {
-                    Size = ModalSize.Large
-                };
-            var parameters = new ModalParameters()
-                .Add(nameof(Dashboard), Value);
-            var modal = Modal.Show<BdfDashboardForm>("Edit Dashboard", parameters, options);
-            var result = await modal.Result;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"{nameof(EditDashboard)}: {ex}");
-        }
+        if (bdfDashboardForm != null)
+            await bdfDashboardForm.Open();
     }
 
     public async Task SaveChanges()
@@ -136,14 +117,12 @@
         if (!string.IsNullOrWhiteSpace(dashboardJson))
             Value = JsonSerializer.Deserialize<Dashboard>(dashboardJson)
                 ?? new Dashboard();
-        //await OnEditModeCancelled.InvokeAsync(Value);
         await ValueChanged.InvokeAsync(Value);
     }
 
     public async Task EnableEditMode()
     {
         await Task.Delay(0);
-        //await OnEditMode.InvokeAsync(Value);
         if (Value != null)
             dashboardJson = JsonSerializer.Serialize<Dashboard>(Value);
         editModeService.EditMode = true;

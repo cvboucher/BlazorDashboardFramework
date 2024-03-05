@@ -1,22 +1,42 @@
-﻿<div class="list-group">
-    @foreach (var widget in widgetService.WidgetTypes.Values)
-    {
-        <button type="button" class="list-group-item list-group-item-action" @onclick="() => SelectWidget(widget)">
-            <h3>@widget.Title</h3>
-            @if (!string.IsNullOrWhiteSpace(widget.Description))
+﻿<BootstrapModal @ref="@modalDialog" 
+                Title="Add New Widget">
+    <BodyContent>
+        <div class="list-group">
+            @foreach (var widget in widgetService.WidgetTypes.Values)
             {
-                <p>@widget.Description</p>
+                <button type="button" class="list-group-item list-group-item-action" @onclick="() => SelectWidget(widget)">
+                    <h3>@widget.Title</h3>
+                    @if (!string.IsNullOrWhiteSpace(widget.Description))
+                    {
+                        <p>@widget.Description</p>
+                    }
+                </button>
             }
-        </button>
-    }
-</div>
+        </div>
+    </BodyContent>
+</BootstrapModal>
+
 
 @code {
     [Inject] public WidgetTypeService widgetService { get; set; } = default!;
-    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
 
-    private async Task SelectWidget(WidgetType widget)
+    [Parameter] public EventCallback<WidgetType> WidgetTypeSelected { get; set; }
+
+    private BootstrapModal modalDialog { get; set; } = default!;
+
+    public async Task Open()
     {
-        await BlazoredModal.CloseAsync(ModalResult.Ok(widget));
+        await modalDialog.Open();
+    }
+
+    public async Task Close()
+    {
+        await modalDialog.Close();
+    }
+
+    private async Task SelectWidget(WidgetType widgetType)
+    {
+        await Close();
+        await WidgetTypeSelected.InvokeAsync(widgetType);
     }
 }

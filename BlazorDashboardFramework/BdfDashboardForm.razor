@@ -1,40 +1,62 @@
-﻿<EditForm Model="@Dashboard">
-    <div class="mb-3">
-        <label for="title" class="form-label">Title</label>
-        <input type="text" class="form-control" id="title" aria-describedby="title" @bind-value="@Dashboard.Title">
-    </div>
-    <div class="row mb-3">
-    <InputRadioGroup Name="layout" @bind-Value="@Dashboard.Layout">
-        <label for="layout" class="form-label">Layout (@Dashboard.Layout)</label>
-        @foreach (var kvp in layoutService.Layouts)
-        {
-                <div class="col-md-1 mb-3">
-                    <InputRadio Name="layout" Value="kvp.Key" class="float-end" />
-                </div>
-                <div class="col-md-5 mb-3 @(kvp.Key == Dashboard.Layout ? "selected" : string.Empty)">
-                    <BdfLayoutPreview dashboard="@kvp.Value" />
-                </div>
-            
-        }
-    </InputRadioGroup>
-    </div>
-    <button type="submit" class="btn btn-primary" @onclick="OnCloseClicked">Close</button>
-</EditForm>
+﻿<BootstrapModal @ref="@modalDialog" 
+                Title="Edit Dashboard" 
+                OnClose="OnModalClose" 
+                OnOpen="OnModalOpen">
+    <BodyContent>
+        <EditForm Model="@Dashboard">
+            <div class="mb-3">
+                <label for="title" class="form-label">Dashboard Title</label>
+                <input type="text" class="form-control" id="title" aria-describedby="title" @bind-value="@Dashboard.Title">
+            </div>
+            <div class="row mb-3">
+                <InputRadioGroup Name="layout" @bind-Value="@Dashboard.Layout">
+                    <label for="layout" class="form-label">Layout (@Dashboard.Layout)</label>
+                    @foreach (var kvp in layoutService.Layouts)
+                    {
+                        <div class="col-md-1 mb-3">
+                            <InputRadio Name="layout" Value="kvp.Key" class="float-end" />
+                        </div>
+                        <div class="col-md-5 mb-3 @(kvp.Key == Dashboard.Layout ? "selected" : string.Empty)">
+                            <BdfLayoutPreview dashboard="@kvp.Value" />
+                        </div>
+
+                    }
+                </InputRadioGroup>
+            </div>
+        </EditForm>
+    </BodyContent>
+    <FooterContent>
+        <button type="submit" class="btn btn-primary" @onclick="@Close">Close</button>
+    </FooterContent>
+</BootstrapModal>
+
 
 @code {
     [Parameter, EditorRequired] public Dashboard Dashboard { get; set; } = default!;
-    //[Parameter] public EventCallback<Dashboard> DashboardChanged { get; set; } = default!;
-    [CascadingParameter] BlazoredModalInstance modalInstance { get; set; } = default!;
+    [Parameter] public EventCallback<Dashboard> DashboardChanged { get; set; } = default!;
+    
     [Inject] LayoutService layoutService { get; set; } = default!;
+    
     private string? currentLayout;
+    private BootstrapModal modalDialog { get; set; } = default!;
 
-    protected override void OnParametersSet()
+    public async Task Open()
     {
-        currentLayout = Dashboard.Layout;
-        base.OnParametersSet();
+        await modalDialog.Open();
     }
 
-    private async Task OnCloseClicked()
+    public async Task Close()
+    {
+        await modalDialog.Close();
+    }
+
+    private async Task OnModalOpen()
+    {
+        await Task.Delay(0);
+        currentLayout = Dashboard.Layout;
+    }
+
+    private async Task OnModalClose()
     {
         if(string.IsNullOrWhiteSpace(currentLayout) || !currentLayout.Equals(Dashboard.Layout))
         {
@@ -46,7 +68,6 @@
                 Dashboard.Rows = newLayout.Rows;
             }
         }
-        //await DashboardChanged.InvokeAsync(Dashboard);
-        await modalInstance.CloseAsync(ModalResult.Ok());
+        await DashboardChanged.InvokeAsync(Dashboard);
     }
 }

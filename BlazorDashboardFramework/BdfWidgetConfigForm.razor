@@ -1,38 +1,71 @@
 ﻿@using System.Text.Json
-<EditForm EditContext="editContext" 
-          OnValidSubmit="OnValidSubmitClicked" 
-          class="form">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-    <div class="mb-3">
-        <label class="form-label">Title</label>
-        <InputText @bind-Value=@WidgetInstance.Title
-                   class="form-control" />
-    </div>
-    @if (widgetType != null && widgetType.EditComponent != null && dynamicComponentParameters != null)
-    {
-        <DynamicComponent Type="widgetType.EditComponent" Parameters="dynamicComponentParameters" />
-    }
-    <div class="float-end">
-        <button type="submit" class="btn btn-primary">Save</button>
-        <button type="button" class="btn btn-secondary" @onclick="OnCancelClicked">Cancel</button>
-    </div>
-</EditForm>
-
+<BootstrapModal @ref=@modalDialog
+                Title="Add/Edit Widget"
+                OnOpen="OnModalOpen">
+    <BodyContent>
+        @if (editContext != null)
+        {
+            <EditForm EditContext="editContext" 
+                    OnValidSubmit="OnValidSubmitClicked" 
+                    class="form">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <div class="mb-3">
+                    <label class="form-label">Title</label>
+                    <InputText @bind-Value=@WidgetInstance.Title
+                               class="form-control" />
+                </div>
+                @if (widgetType != null && widgetType.EditComponent != null && dynamicComponentParameters != null)
+                {
+                    <DynamicComponent Type="widgetType.EditComponent" Parameters="dynamicComponentParameters" />
+                }
+                <div class="float-end">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" @onclick="OnCancelClicked">Cancel</button>
+                </div>
+            </EditForm>
+        }
+        
+    </BodyContent>
+</BootstrapModal>
 @code {
-    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
-
     [Parameter] public WidgetInstance WidgetInstance { get; set; } = default!;
+    [Parameter] public EventCallback<WidgetInstance> WidgetInstanceChanged { get; set; } 
 
     [Inject] public WidgetTypeService widgetTypeService { get; set; } = default!;
 
+    private BootstrapModal modalDialog { get; set; } = default!;
     private EditContext editContext = default!;
     private WidgetType? widgetType;
     private object? configObject;
     private Dictionary<string, object> dynamicComponentParameters = default!;
 
-    protected override async Task OnParametersSetAsync()
+    public async Task Open()
     {
+        await modalDialog.Open();
+    }
+
+    private async Task Close()
+    {
+        await modalDialog.Close();
+    }
+
+    private async Task OnValidSubmitClicked()
+    {
+        if (configObject != null)
+            WidgetInstance.Config = JsonSerializer.Serialize(configObject);
+        await WidgetInstanceChanged.InvokeAsync(WidgetInstance);
+        await Close();
+    }
+
+    private async Task OnCancelClicked()
+    {
+        await Close();
+    }
+
+    private async Task OnModalOpen()
+    {
+        await Task.Delay(0);
         try
         {
             widgetType = widgetTypeService.GetWidgetType(WidgetInstance.Type)
@@ -51,18 +84,5 @@
         {
             Console.WriteLine(ex.Message);
         }
-        await base.OnParametersSetAsync();
-    }
-
-    private void OnValidSubmitClicked()
-    {
-        if (configObject != null)
-            WidgetInstance.Config = JsonSerializer.Serialize(configObject);
-        BlazoredModal.CloseAsync(ModalResult.Ok(WidgetInstance));
-    }
-
-    private void OnCancelClicked()
-    {
-        BlazoredModal.CancelAsync();
     }
 }

@@ -2,11 +2,9 @@
 
 Requirements:
 Add the following client side libraries to your app.
-Bootstrap 5.*
-Bootstrap-Icons 1.*
-Sortable 1.*
-
-Add <CascadingBlazoredModal> around <Router>
+Bootstrap 5.* (Add link tag to css and script tag to JavaScript)
+Bootstrap-Icons 1.* (Add link tag to css)
+Sortable 1.* (Add script tag to JavaScript).
 
 Predefined layouts are available in LayoutService.Layouts.  You can define and add additional Layouts to LayoutService.Layouts.
 Add additional WidgetTypes to WidgetTypeService.WidgetTypes

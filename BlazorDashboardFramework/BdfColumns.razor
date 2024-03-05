@@ -8,13 +8,6 @@
         }
         else if (editModeService.EditMode)
         {
-@*             <Dropzone Items="column.Widgets" Id="@column.ColumnId">
-                <div style="width: 100%;">
-                    <BdfWidget @bind-Widget="@context" 
-                               OnDeleteWidget="@(() => DeleteWidgetInstance(column, context))"
-                               OnCopyWidget="@(() => CopyWidgetInstance(column, context))"/>
-                </div>
-            </Dropzone> *@
             <SortableList Group="bdf"
                           Items="column.Widgets"
                           Context="widget"
