@@ -116,7 +116,7 @@
         editModeService.EditMode = false;
         if (!string.IsNullOrWhiteSpace(dashboardJson))
             Value = JsonSerializer.Deserialize<Dashboard>(dashboardJson)
-                ?? new Dashboard();
+                ?? new Dashboard() { Title = "Dashboard" };
         await ValueChanged.InvokeAsync(Value);
     }
 
