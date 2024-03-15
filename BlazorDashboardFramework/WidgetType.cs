@@ -17,13 +17,8 @@ namespace BlazorDashboardFramework
         public Type? ConfigType { get; set; }
         public string? Config { get; set; }
         public bool HideWidget { get; set; }
-        public bool SetHideWidgetEventCallback { get; set; }
         public bool HideHeader { get; set; }
-        public bool SetHideHeaderEventCallback { get; set; }
-        public bool ToggleHideHeaderEventCallback { get; set; }
         public bool Collapsed { get; set; }
-        public bool SetCollapsedEventCallback { get; set; }
-        public bool ToggleCollapsedEventCallback { get; set; }
         
 
         public WidgetInstance GetInstance()
@@ -32,10 +27,7 @@ namespace BlazorDashboardFramework
             {
                 Type = this.Type,
                 Title = this.Title,
-                Config = this.Config,
-                HideWidget = this.HideWidget,
-                HideHeader = this.HideHeader,
-                Collapsed = this.Collapsed
+                Config = this.Config
             };
         }
 

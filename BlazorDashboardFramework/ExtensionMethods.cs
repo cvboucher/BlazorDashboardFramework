@@ -21,7 +21,7 @@ namespace BlazorDashboardFramework
 
         public static IServiceCollection AddBlazorDashboardFramework(this IServiceCollection services)
         {
-            services.AddSingleton<ClockWidgetService>();
+            services.AddSingleton<Widgets.Clock.ClockWidgetService>();
             services.AddScoped<EditModeService>();
             services.AddSingleton<LayoutService>();
             services.AddSingleton<WidgetTypeService>();

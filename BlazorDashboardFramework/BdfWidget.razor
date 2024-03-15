@@ -1,8 +1,8 @@
 ﻿@implements IDisposable
-@if (!Widget.HideWidget || editModeService.EditMode)
+@if (!HideWidget || editModeService.EditMode)
 {
     <div class="card mt-1 mb-3">
-        @if (!Widget.HideHeader || editModeService.EditMode)
+        @if (!HideHeader || editModeService.EditMode)
         {
             <div class="card-header hover-container">
                 @(Widget.Title)
@@ -16,8 +16,10 @@
                             <i class="bi bi-arrows-move"></i>
                         </a>
                     }
-                    <a href="" class="ms-1" title="@(Widget.Collapsed ? "Expand widget" : "Collapse widget")" @onclick="@ExpandCollapseWidget" @onclick:preventDefault>
-                        <i class="bi @(Widget.Collapsed ? "bi-plus" : "bi-dash")"></i>
+                    <a title="@(Collapsed ? "Expand widget" : "Collapse widget")"
+                       href="" class="ms-1"
+                       @onclick="@ExpandCollapseWidget" @onclick:preventDefault>
+                        <i class="bi @(Collapsed ? "bi-caret-down-fill" : "bi-caret-right-fill")"></i>
                     </a>
                     @if (editModeService.EditMode)
                     {
@@ -34,7 +36,7 @@
                 </div>
             </div>
         }
-        @if (widgetParameters != null && !Widget.Collapsed && widgetType != null)
+        @if (widgetParameters != null && !Collapsed && widgetType != null)
         {
             <div class="card-body">
                 <CascadingValue Value="@this">
@@ -95,80 +97,51 @@
         var config = widgetType.GetConfig(Widget?.Config);
         if (config != null)
             widgetParameters.Add("Config", config);
-        if (widgetType.SetHideHeaderEventCallback)
-            widgetParameters.Add("SetHideHeader", EventCallback.Factory.Create<bool>(this, OnSetHideHeader));
-        if (widgetType.ToggleHideHeaderEventCallback)
-            widgetParameters.Add("ToggleHideHeader", EventCallback.Factory.Create(this, OnToggleHideHeader));
-        if (widgetType.SetCollapsedEventCallback)
-            widgetParameters.Add("SetCollapsed", EventCallback.Factory.Create<bool>(this, OnSetCollapsed));
-        if (widgetType.ToggleCollapsedEventCallback)
-            widgetParameters.Add("ToggleCollapsed", EventCallback.Factory.Create(this, OnToggleCollapsed));
-        if (widgetType.SetHideWidgetEventCallback)
-            widgetParameters.Add("SetHideWidget", EventCallback.Factory.Create<bool>(this, OnSetHideWidget));
+        HideHeader = widgetType.HideHeader;
+        Collapsed = widgetType.Collapsed;
+        HideWidget = widgetType.HideWidget;
     }
 
+    private bool hideWidget;
     public bool HideWidget
     {
-        get => Widget.HideWidget;
+        get => hideWidget;
         set 
         {
-            if (Widget.HideWidget != value)
+            if (hideWidget != value)
             {
-                Widget.HideWidget = value;
+                hideWidget = value;
                 StateHasChanged();
             }
         }
     }
 
+    private bool collapsed;
     public bool Collapsed
     {
-        get => Widget.Collapsed;
+        get => collapsed;
         set
         {
-            if (Widget.Collapsed != value)
+            if (collapsed != value)
             {
-                Widget.Collapsed = value;
+                collapsed = value;
                 StateHasChanged();
             }
         }
     }
 
+    private bool hideHeader;
     public bool HideHeader
     {
-        get => Widget.HideHeader;
+        get => hideHeader;
         set 
         {
-            if (Widget.HideHeader != value)
+            if (hideHeader != value)
             {
-                Widget.HideHeader = value;
+                hideHeader = value;
                 StateHasChanged();
             }
         }
-    }
-
-    private void OnSetCollapsed(bool collapsed)
-    {
-        Widget.Collapsed = collapsed;
-    }
-
-    private void OnSetHideHeader(bool hideHeader)
-    {
-        Widget.HideHeader = hideHeader;
-    }
-
-    private void OnToggleHideHeader()
-    {
-        Widget.HideHeader = !Widget.HideHeader;
-    }
-
-    private void OnSetHideWidget(bool hideWidget)
-    {
-        Widget.HideWidget = hideWidget;
-    }
-
-    private void OnToggleCollapsed()
-    {
-        Widget.Collapsed = !Widget.Collapsed;
     }
 
     private async Task WidgetInstanceChanged(WidgetInstance widgetInstance)
@@ -195,10 +168,9 @@
         }
     }
 
-    public async Task ExpandCollapseWidget()
+    public void ExpandCollapseWidget()
     {
-        Widget.Collapsed = !Widget.Collapsed;
-        await WidgetChanged.InvokeAsync(Widget);
+        Collapsed = !Collapsed;
     }
 
     public async Task EditWidgetConfiguration()

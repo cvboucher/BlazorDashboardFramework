@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorDashboardFramework.Widgets
+namespace BlazorDashboardFramework.Widgets.Clock
 {
     public class ClockWidgetService : IAsyncDisposable
     {

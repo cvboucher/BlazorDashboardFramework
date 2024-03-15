@@ -14,8 +14,5 @@ namespace BlazorDashboardFramework
         [Required]
         required public string Title { get; set; }
         public string? Config { get; set; }
-        public bool HideWidget { get; set; }
-        public bool HideHeader { get; set; }
-        public bool Collapsed { get; set; }
     }
 }

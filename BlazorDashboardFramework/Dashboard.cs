@@ -11,7 +11,6 @@ namespace BlazorDashboardFramework
     {
         public Guid DashboardId { get; set; } = Guid.NewGuid();
         public string Layout { get; set; } = "6-6";
-        //public bool ReadOnly { get; set; }
         required public string Title { get; set; }
         public List<Row> Rows { get; set; } = new();
 
@@ -140,6 +139,24 @@ namespace BlazorDashboardFramework
                     PopulateWidgets(queue, column.Rows);
                 else if (queue.Any())
                     column.Widgets.AddRange(queue.Dequeue());
+        }
+
+        public void RegenerateIds()
+        {
+            foreach (var row in this.Rows)
+                RegenerateIds(row.Columns);
+        }
+
+        public void RegenerateIds(List<Column> columns)
+        {
+            foreach (var column in columns)
+            {
+                column.ColumnId = Guid.NewGuid().ToString();
+                foreach (var widget in  column.Widgets)
+                    widget.WidgetInstanceId = Guid.NewGuid().ToString();
+                foreach (var row in column.Rows)
+                    RegenerateIds(row.Columns);
+            }
         }
 
     }

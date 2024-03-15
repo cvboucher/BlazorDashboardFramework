@@ -3,11 +3,6 @@
 @code {
     [CascadingParameter] public BdfWidget bdfWidget { get; set; } = default!;
     [Parameter] public ClockConfig Config { get; set; } = default!;
-    [Parameter] public EventCallback<bool> SetCollapsed { get; set; }
-    [Parameter] public EventCallback<bool> SetHideHeader { get; set; }
-    [Parameter] public EventCallback<bool> SetHideWidget { get; set; }
-    [Parameter] public EventCallback ToggleCollapsed { get; set; }
-    [Parameter] public EventCallback ToggleHideHeader { get; set; }
     [Inject] ClockWidgetService clockWidgetService { get; set; } = default!;
 
     private bool ranOnce;
@@ -22,7 +17,7 @@
     {
         base.OnParametersSet();
         if (Config.HideHeader)
-            bdfWidget.HideHeader = true; ;
+            bdfWidget.HideHeader = true;
     }
 
     private string GetClockFormat()
@@ -31,16 +26,6 @@
             ? "T"
             : Config.Format;
     }
-
-    // protected override async Task OnParametersSetAsync()
-    // {
-    //     if (!ranOnce)
-    //     {
-    //         ranOnce = true;
-    //         await SetHideHeader.InvokeAsync(Config.HideHeader);
-    //     }
-    //     await base.OnParametersSetAsync();
-    // }
 
     private async void OnCurrentDateTimeChanged(object? sender, DateTime e)
     {
