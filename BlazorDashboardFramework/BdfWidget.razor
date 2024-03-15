@@ -37,7 +37,9 @@
         @if (widgetParameters != null && !Widget.Collapsed && widgetType != null)
         {
             <div class="card-body">
-                <DynamicComponent Type="@widgetType.DisplayComponent" Parameters="widgetParameters" />
+                <CascadingValue Value="@this">
+                    <DynamicComponent Type="@widgetType.DisplayComponent" Parameters="widgetParameters" />
+                </CascadingValue>
             </div>
         }
     </div>
@@ -103,6 +105,45 @@
             widgetParameters.Add("ToggleCollapsed", EventCallback.Factory.Create(this, OnToggleCollapsed));
         if (widgetType.SetHideWidgetEventCallback)
             widgetParameters.Add("SetHideWidget", EventCallback.Factory.Create<bool>(this, OnSetHideWidget));
+    }
+
+    public bool HideWidget
+    {
+        get => Widget.HideWidget;
+        set 
+        {
+            if (Widget.HideWidget != value)
+            {
+                Widget.HideWidget = value;
+                StateHasChanged();
+            }
+        }
+    }
+
+    public bool Collapsed
+    {
+        get => Widget.Collapsed;
+        set
+        {
+            if (Widget.Collapsed != value)
+            {
+                Widget.Collapsed = value;
+                StateHasChanged();
+            }
+        }
+    }
+
+    public bool HideHeader
+    {
+        get => Widget.HideHeader;
+        set 
+        {
+            if (Widget.HideHeader != value)
+            {
+                Widget.HideHeader = value;
+                StateHasChanged();
+            }
+        }
     }
 
     private void OnSetCollapsed(bool collapsed)

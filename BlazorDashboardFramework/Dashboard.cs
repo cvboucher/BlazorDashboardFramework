@@ -11,7 +11,7 @@ namespace BlazorDashboardFramework
     {
         public Guid DashboardId { get; set; } = Guid.NewGuid();
         public string Layout { get; set; } = "6-6";
-        public bool ReadOnly { get; set; }
+        //public bool ReadOnly { get; set; }
         required public string Title { get; set; }
         public List<Row> Rows { get; set; } = new();
 

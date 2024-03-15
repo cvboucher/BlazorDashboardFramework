@@ -1,6 +1,7 @@
 ﻿@implements IDisposable
 <div class="text-center fs-2">@clockWidgetService.CurrentDateTime.ToString(GetClockFormat())</div>
 @code {
+    [CascadingParameter] public BdfWidget bdfWidget { get; set; } = default!;
     [Parameter] public ClockConfig Config { get; set; } = default!;
     [Parameter] public EventCallback<bool> SetCollapsed { get; set; }
     [Parameter] public EventCallback<bool> SetHideHeader { get; set; }
@@ -17,6 +18,13 @@
         base.OnInitialized();
     }
 
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Config.HideHeader)
+            bdfWidget.HideHeader = true; ;
+    }
+
     private string GetClockFormat()
     {
         return string.IsNullOrWhiteSpace(Config?.Format)
@@ -24,15 +32,15 @@
             : Config.Format;
     }
 
-    protected override async Task OnParametersSetAsync()
-    {
-        if (!ranOnce)
-        {
-            ranOnce = true;
-            await SetHideHeader.InvokeAsync(Config.HideHeader);
-        }
-        await base.OnParametersSetAsync();
-    }
+    // protected override async Task OnParametersSetAsync()
+    // {
+    //     if (!ranOnce)
+    //     {
+    //         ranOnce = true;
+    //         await SetHideHeader.InvokeAsync(Config.HideHeader);
+    //     }
+    //     await base.OnParametersSetAsync();
+    // }
 
     private async void OnCurrentDateTimeChanged(object? sender, DateTime e)
     {
