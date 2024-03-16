@@ -7,4 +7,5 @@
 
 @code {
     [Parameter, EditorRequired] public List<Row> Rows { get; set; } = default!;
+    [Parameter] public EventCallback<List<Row>> RowsChanged { get; set; } = default!;
 }

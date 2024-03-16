@@ -24,6 +24,7 @@ namespace BlazorDashboardFramework
             services.AddSingleton<Widgets.Clock.ClockWidgetService>();
             services.AddScoped<EditModeService>();
             services.AddSingleton<LayoutService>();
+            services.AddSingleton<SortableListService>();
             services.AddSingleton<WidgetTypeService>();
 
             return services;

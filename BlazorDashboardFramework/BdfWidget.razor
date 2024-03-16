@@ -77,8 +77,16 @@
     protected override void OnParametersSet()
     {
         if (widgetType == null)
+        {
             widgetType = widgetTypeService.GetWidgetType(Widget.Type);
-        if (widgetParameters == null)
+            if (widgetType != null)
+            {
+                HideHeader = widgetType.HideHeader;
+                Collapsed = widgetType.Collapsed;
+                HideWidget = widgetType.HideWidget;
+            }
+        }
+        //if (widgetParameters == null)
             LoadWidgetParameters();
         base.OnParametersSet();
     }
@@ -97,9 +105,7 @@
         var config = widgetType.GetConfig(Widget?.Config);
         if (config != null)
             widgetParameters.Add("Config", config);
-        HideHeader = widgetType.HideHeader;
-        Collapsed = widgetType.Collapsed;
-        HideWidget = widgetType.HideWidget;
+        
     }
 
     private bool hideWidget;

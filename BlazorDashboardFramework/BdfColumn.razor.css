@@ -1,0 +1,10 @@
+﻿.column.edit {
+    min-height: 120px;
+    border: 1px dashed #ccc;
+    /*padding-top: 15px;*/
+    border-radius: 5px;
+}
+
+::deep .plk-dd-dropzone {
+    height: 100%;
+}

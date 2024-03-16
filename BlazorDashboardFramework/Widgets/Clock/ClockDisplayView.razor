@@ -13,11 +13,14 @@
         base.OnInitialized();
     }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
-        base.OnParametersSet();
-        if (Config.HideHeader)
-            bdfWidget.HideHeader = true;
+        if (Config.HideHeader != bdfWidget.HideHeader)
+        {
+            bdfWidget.HideHeader = Config.HideHeader;
+            await InvokeAsync(() => StateHasChanged());
+        }
+        await base.OnParametersSetAsync();
     }
 
     private string GetClockFormat()
