@@ -19,7 +19,7 @@
                     <a title="@(Collapsed ? "Expand widget" : "Collapse widget")"
                        href="" class="ms-1"
                        @onclick="@ExpandCollapseWidget" @onclick:preventDefault>
-                        <i class="bi @(Collapsed ? "bi-caret-down-fill" : "bi-caret-right-fill")"></i>
+                        <i class="bi @(Collapsed ? "bi-caret-right-fill" : "bi-caret-down-fill")"></i>
                     </a>
                     @if (editModeService.EditMode)
                     {
