@@ -15,31 +15,31 @@ namespace BlazorDashboardFramework
         public List<Row> Rows { get; set; } = new();
 
 
-        public void MoveWidget(int oldIndex, int newIndex, string fromId, string toId)
-        {
-            var fromColumn = FindColumn(fromId)
-                ?? throw new Exception($"Unable to find from ColumnId {fromId}");
-            var toColumn = FindColumn(toId)
-                ?? throw new Exception($"Unable to find to ColumnId {toId}");
-            if (fromColumn == toColumn)
-            {
-                var itemToMove = fromColumn.Widgets[oldIndex];
-                fromColumn.Widgets.RemoveAt(oldIndex);
-                if (newIndex < fromColumn.Widgets.Count)
-                    fromColumn.Widgets.Insert(newIndex, itemToMove);
-                else
-                    fromColumn.Widgets.Add(itemToMove);
-                fromColumn.OnWidgetsChanged();
-            }
-            else
-            {
-                var itemToMove = fromColumn.Widgets[oldIndex];
-                toColumn.Widgets.Insert(newIndex, itemToMove);
-                fromColumn.Widgets.Remove(fromColumn.Widgets[oldIndex]);
-                fromColumn.OnWidgetsChanged();
-                toColumn.OnWidgetsChanged();
-            }
-        }
+        //public void MoveWidget(int oldIndex, int newIndex, string fromId, string toId)
+        //{
+        //    var fromColumn = FindColumn(fromId)
+        //        ?? throw new Exception($"Unable to find from ColumnId {fromId}");
+        //    var toColumn = FindColumn(toId)
+        //        ?? throw new Exception($"Unable to find to ColumnId {toId}");
+        //    if (fromColumn == toColumn)
+        //    {
+        //        var itemToMove = fromColumn.Widgets[oldIndex];
+        //        fromColumn.Widgets.RemoveAt(oldIndex);
+        //        if (newIndex < fromColumn.Widgets.Count)
+        //            fromColumn.Widgets.Insert(newIndex, itemToMove);
+        //        else
+        //            fromColumn.Widgets.Add(itemToMove);
+        //        fromColumn.OnWidgetsChanged();
+        //    }
+        //    else
+        //    {
+        //        var itemToMove = fromColumn.Widgets[oldIndex];
+        //        toColumn.Widgets.Insert(newIndex, itemToMove);
+        //        fromColumn.Widgets.Remove(fromColumn.Widgets[oldIndex]);
+        //        fromColumn.OnWidgetsChanged();
+        //        toColumn.OnWidgetsChanged();
+        //    }
+        //}
 
         public Column? FindFirstColumn()
         {

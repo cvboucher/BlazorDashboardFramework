@@ -15,7 +15,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (Config.HideHeader != bdfWidget.HideHeader)
+        if (bdfWidget != null && Config.HideHeader != bdfWidget.HideHeader)
         {
             bdfWidget.HideHeader = Config.HideHeader;
             await InvokeAsync(() => StateHasChanged());
