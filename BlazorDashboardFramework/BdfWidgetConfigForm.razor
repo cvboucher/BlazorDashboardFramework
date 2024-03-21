@@ -1,6 +1,6 @@
 ﻿@using System.Text.Json
 <BootstrapModal @ref=@modalDialog
-                Title="Add/Edit Widget"
+                Title="@WidgetInstance.Title"
                 OnOpen="OnModalOpen">
     <BodyContent>
         @if (editContext != null)
@@ -68,11 +68,12 @@
         try
         {
             widgetType = widgetTypeService.GetWidgetType(WidgetInstance.Type)
-            ?? throw new Exception($"WidgetType {WidgetInstance.Type} not found.");
+                ?? throw new Exception($"WidgetType {WidgetInstance.Type} not found.");
+            editContext = new EditContext(WidgetInstance);
             if (widgetType.ConfigType == null)
                 return;
             configObject = widgetType.GetConfig(WidgetInstance.Config);
-            editContext = new EditContext(configObject ?? WidgetInstance);
+            //editContext = new EditContext(configObject ?? WidgetInstance);
             if (configObject != null)
                 dynamicComponentParameters = new Dictionary<string, object>()
                 {

@@ -74,7 +74,7 @@
         base.OnInitialized();
     }
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
         if (widgetType == null)
         {
@@ -87,17 +87,33 @@
             }
         }
         //if (widgetParameters == null)
-            LoadWidgetParameters();
-        base.OnParametersSet();
+        await LoadWidgetParameters();
+        await base.OnParametersSetAsync();
     }
+    // protected override void OnParametersSet()
+    // {
+    //     if (widgetType == null)
+    //     {
+    //         widgetType = widgetTypeService.GetWidgetType(Widget.Type);
+    //         if (widgetType != null)
+    //         {
+    //             HideHeader = widgetType.HideHeader;
+    //             Collapsed = widgetType.Collapsed;
+    //             HideWidget = widgetType.HideWidget;
+    //         }
+    //     }
+    //     //if (widgetParameters == null)
+    //     await LoadWidgetParameters();
+    //     base.OnParametersSet();
+    // }
 
-    private void OnWidgetInstanceChanged(WidgetInstance widgetInstance)
+    private async void OnWidgetInstanceChanged(WidgetInstance widgetInstance)
     {
         Widget = widgetInstance;
-        LoadWidgetParameters();
+        await LoadWidgetParameters();
     }
 
-    private void LoadWidgetParameters()
+    private async Task LoadWidgetParameters()
     {
         if (Widget == null || widgetType == null)
             return;
@@ -105,7 +121,8 @@
         var config = widgetType.GetConfig(Widget?.Config);
         if (config != null)
             widgetParameters.Add("Config", config);
-        
+        await InvokeAsync(() => StateHasChanged());
+
     }
 
     private bool hideWidget;
