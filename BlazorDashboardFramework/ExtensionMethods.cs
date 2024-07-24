@@ -19,6 +19,33 @@ namespace BlazorDashboardFramework
             return JsonSerializer.Deserialize<T>(serialized);
         }
 
+        public static string SerializeWithCamelCase<T>(this T data)
+        {
+            return JsonSerializer.Serialize(data, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true
+            });
+        }
+
+        public static T DeserializeFromCamelCase<T>(this string json)
+        {
+            return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true
+            });
+        }
+
+        public static object DeserializeFromCamelCase(this string json, Type type)
+        {
+            return JsonSerializer.Deserialize(json, type, new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true
+            });
+        }
+
         public static IServiceCollection AddBlazorDashboardFramework(this IServiceCollection services)
         {
             services.AddSingleton<Widgets.Clock.ClockWidgetService>();

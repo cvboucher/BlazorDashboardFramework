@@ -36,12 +36,19 @@
                 </div>
             </div>
         }
-        @if (widgetParameters != null && !Collapsed && widgetType != null)
+        @if (!collapsed)
         {
             <div class="card-body">
-                <CascadingValue Value="@this">
-                    <DynamicComponent Type="@widgetType.DisplayComponent" Parameters="widgetParameters" />
-                </CascadingValue>
+                @if (widgetParameters != null && widgetType != null)
+                {
+                        <CascadingValue Value="@this">
+                            <DynamicComponent Type="@widgetType.DisplayComponent" Parameters="widgetParameters" />
+                        </CascadingValue>
+                }
+                else
+                {
+                    <h1>@Widget.Type</h1>
+                }
             </div>
         }
     </div>
@@ -115,14 +122,20 @@
 
     private async Task LoadWidgetParameters()
     {
-        if (Widget == null || widgetType == null)
-            return;
-        widgetParameters = new Dictionary<string, object>();
-        var config = widgetType.GetConfig(Widget?.Config);
-        if (config != null)
-            widgetParameters.Add("Config", config);
-        await InvokeAsync(() => StateHasChanged());
-
+        try
+        {
+            if (Widget == null || widgetType == null)
+                return;
+            widgetParameters = new Dictionary<string, object>();
+            var config = widgetType.GetConfig(Widget?.Config);
+            if (config != null)
+                widgetParameters.Add("Config", config);
+            await InvokeAsync(() => StateHasChanged());
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
     }
 
     private bool hideWidget;
@@ -169,6 +182,7 @@
 
     private async Task WidgetInstanceChanged(WidgetInstance widgetInstance)
     {
+        await LoadWidgetParameters();
         await InvokeAsync(() => StateHasChanged());
     }
 

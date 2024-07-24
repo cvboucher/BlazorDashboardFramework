@@ -18,7 +18,6 @@
                 @if (widgetType != null && widgetType.EditComponent != null && dynamicComponentParameters != null)
                 {
                     <DynamicComponent Type="widgetType.EditComponent" Parameters="dynamicComponentParameters" />
-                    <DynamicComponent Type="widgetType.DisplayComponent" Parameters="dynamicComponentParameters" />
                 }
                 <div class="float-end">
                     <button type="submit" class="btn btn-primary">Save</button>
@@ -53,7 +52,10 @@
     private async Task OnValidSubmitClicked()
     {
         if (configObject != null)
-            WidgetInstance.Config = JsonSerializer.Serialize(configObject);
+            WidgetInstance.Config = JsonSerializer.SerializeToElement(configObject, new JsonSerializerOptions()
+            {
+               PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            }); 
         await WidgetInstanceChanged.InvokeAsync(WidgetInstance);
         await Close();
     }

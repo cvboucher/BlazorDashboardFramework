@@ -9,9 +9,13 @@ namespace BlazorDashboardFramework
 {
     public class Column
     {
+        [JsonPropertyName("cid")]
         public string ColumnId { get; set; } = Guid.NewGuid().ToString();
+        [JsonPropertyName("styleClass")]
         required public string StyleClass { get; set; }
+        [JsonPropertyName("widgets")]
         public List<WidgetInstance> Widgets { get; set; } = new();
+        [JsonPropertyName("rows")]
         public List<Row> Rows { get; set; } = new();
 
         [JsonIgnore]

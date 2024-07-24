@@ -3,16 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace BlazorDashboardFramework
 {
     public class Dashboard
     {
-        public Guid DashboardId { get; set; } = Guid.NewGuid();
+        //public string DashboardId { get; set; } = Guid.NewGuid().ToString();
+        [JsonPropertyName("structure")]
         public string Layout { get; set; } = "6-6";
-        required public string Title { get; set; }
+        [JsonPropertyName("title")]
+        public string? Title { get; set; }
+        [JsonPropertyName("rows")]
         public List<Row> Rows { get; set; } = new();
+        [JsonPropertyName("titleTemplateUrl")]
+        public string? TitleTemplateUrl { get; set; }
 
 
         //public void MoveWidget(int oldIndex, int newIndex, string fromId, string toId)

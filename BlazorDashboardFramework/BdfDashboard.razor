@@ -3,7 +3,7 @@
 @if (Value != null)
 {
 <h1 class="dashboard-header">
-    <span class="dashboard-tile">@Value.Title</span>
+    <span class="dashboard-tile">@Value?.Title</span>
     <span class="float-end">
         @if (editModeService.EditMode)
         {
@@ -25,14 +25,18 @@
         }
         else
         {
-            <a href="" title="Enable edit mode" @onclick="@EnableEditMode" @onclick:preventDefault>
-                <i class="@EditModeIconCss"></i>
-            </a>
+            @if (!ReadOnly)
+            {
+                <a href="" title="Enable edit mode" @onclick="@EnableEditMode" @onclick:preventDefault>
+                    <i class="@EditModeIconCss"></i>
+                </a>
+            }
+                
         }
     </span>
 </h1>
 <CascadingValue Value="Value">
-    <BdfRows Rows="@Value.Rows" />
+    <BdfRows Rows="@Value?.Rows" />
 </CascadingValue>
 }
 @if (editModeService.EditMode)
@@ -44,6 +48,7 @@
 @code {
     [Parameter] public Dashboard? Value { get; set; } = default!;
     [Parameter] public EventCallback<Dashboard> ValueChanged { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
     [Parameter] public string AddWidgetIconCss { get; set; } = "bi bi-plus-square";
     [Parameter] public string EditDashbaordIconCss { get; set; } = "bi bi-gear";
     [Parameter] public string SaveDashboardIconCss { get; set; } = "bi bi-save";
@@ -70,10 +75,10 @@
 
     protected override void OnParametersSet()
     {
-        if (Value == null && !string.IsNullOrWhiteSpace(DefaultLayout))
-            Value = layoutService.GetLayout(DefaultLayout);
-        if (Value == null)
-            Value = layoutService.GetDefaultLayout();
+        // if (Value == null && !string.IsNullOrWhiteSpace(DefaultLayout))
+        //     Value = layoutService.GetLayout(DefaultLayout);
+        // if (Value == null)
+        //     Value = layoutService.GetDefaultLayout();
         base.OnParametersSet();
     }
 
@@ -124,7 +129,7 @@
     {
         await Task.Delay(0);
         if (Value != null)
-            dashboardJson = JsonSerializer.Serialize<Dashboard>(Value);
+            dashboardJson = JsonSerializer.Serialize(Value);
         editModeService.EditMode = true;
     }
        
