@@ -11,7 +11,7 @@
             <div class="row mb-3">
                 <InputRadioGroup Name="layout" @bind-Value="@Dashboard.Layout">
                     <label for="layout" class="form-label">Layout (@Dashboard.Layout)</label>
-                    @foreach (var kvp in layoutService.Layouts)
+                    @foreach (var kvp in layoutService.Structures)
                     {
                         <div class="col-md-1 mb-3">
                             <InputRadio Name="layout" Value="kvp.Key" class="float-end" />
@@ -35,7 +35,7 @@
     [Parameter, EditorRequired] public Dashboard Dashboard { get; set; } = default!;
     [Parameter] public EventCallback<Dashboard> DashboardChanged { get; set; } = default!;
     
-    [Inject] LayoutService layoutService { get; set; } = default!;
+    [Inject] StructureService layoutService { get; set; } = default!;
     
     private string? currentLayout;
     private BootstrapModal modalDialog { get; set; } = default!;

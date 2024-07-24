@@ -7,22 +7,22 @@ using System.Threading.Tasks;
 
 namespace BlazorDashboardFramework.Services
 {
-    public class LayoutService
+    public class StructureService
     {
 
-        public Dictionary<string, Dashboard> Layouts { get; } = new();
+        public Dictionary<string, Dashboard> Structures { get; } = new();
 
-        public LayoutService()
+        public StructureService()
         {
-            Layouts.Add(SixSixStructure.Title, SixSixStructure);
-            Layouts.Add(FourEightStructure.Title, FourEightStructure);
-            Layouts.Add(TwelveFourFourFourStructure.Title, TwelveFourFourFourStructure);
-            Layouts.Add(TwelveSixSixStructure.Title, TwelveSixSixStructure);
-            Layouts.Add(TwelveSixSixTwelveStructure.Title, TwelveSixSixTwelveStructure);
-            Layouts.Add(ThreeNineTwelveSixsixStructure.Title, ThreeNineTwelveSixsixStructure);
-            Layouts.Add(TwelveThreeThreeThreeThreeStructure.Title, TwelveThreeThreeThreeThreeStructure);
-            Layouts.Add(ThreeNineTwelveFourFourFourStructure.Title, ThreeNineTwelveFourFourFourStructure);
-            Layouts.Add(TwelveThreeSixThreeTwelveStructure.Title, TwelveThreeSixThreeTwelveStructure);
+            Structures.Add(SixSixStructure.Title, SixSixStructure);
+            Structures.Add(FourEightStructure.Title, FourEightStructure);
+            Structures.Add(TwelveFourFourFourStructure.Title, TwelveFourFourFourStructure);
+            Structures.Add(TwelveSixSixStructure.Title, TwelveSixSixStructure);
+            Structures.Add(TwelveSixSixTwelveStructure.Title, TwelveSixSixTwelveStructure);
+            Structures.Add(ThreeNineTwelveSixsixStructure.Title, ThreeNineTwelveSixsixStructure);
+            Structures.Add(TwelveThreeThreeThreeThreeStructure.Title, TwelveThreeThreeThreeThreeStructure);
+            Structures.Add(ThreeNineTwelveFourFourFourStructure.Title, ThreeNineTwelveFourFourFourStructure);
+            Structures.Add(TwelveThreeSixThreeTwelveStructure.Title, TwelveThreeSixThreeTwelveStructure);
         }
 
         public Dashboard GetDefaultLayout()
@@ -35,7 +35,7 @@ namespace BlazorDashboardFramework.Services
 
         public Dashboard? GetFirstOrDefault()
         {
-            var layout = Layouts.Values.FirstOrDefault()?.DeepCopy();
+            var layout = Structures.Values.FirstOrDefault()?.DeepCopy();
             //if (layout != null)
             //    layout.Title = null;
             return layout;
@@ -43,7 +43,7 @@ namespace BlazorDashboardFramework.Services
 
         public Dashboard? GetLayout(string title)
         {
-            var layout = Layouts.Values
+            var layout = Structures.Values
                 .FirstOrDefault(x => title.Equals(x.Title, StringComparison.OrdinalIgnoreCase))?
                 .DeepCopy();
             //if (layout != null)

@@ -13,6 +13,13 @@ namespace BlazorDashboardFramework
 {
     public static class ExtensionMethods
     {
+
+        public static JsonSerializerOptions DefaultJsonSerializerOptions = new JsonSerializerOptions()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            PropertyNameCaseInsensitive = true
+        };
+
         public static T? DeepCopy<T>(this T self)
         {
             var serialized = JsonSerializer.Serialize(self);
@@ -21,36 +28,24 @@ namespace BlazorDashboardFramework
 
         public static string SerializeWithCamelCase<T>(this T data)
         {
-            return JsonSerializer.Serialize(data, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                PropertyNameCaseInsensitive = true
-            });
+            return JsonSerializer.Serialize(data, DefaultJsonSerializerOptions);
         }
 
         public static T DeserializeFromCamelCase<T>(this string json)
         {
-            return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                PropertyNameCaseInsensitive = true
-            });
+            return JsonSerializer.Deserialize<T>(json, DefaultJsonSerializerOptions);
         }
 
         public static object DeserializeFromCamelCase(this string json, Type type)
         {
-            return JsonSerializer.Deserialize(json, type, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                PropertyNameCaseInsensitive = true
-            });
+            return JsonSerializer.Deserialize(json, type, DefaultJsonSerializerOptions);
         }
 
         public static IServiceCollection AddBlazorDashboardFramework(this IServiceCollection services)
         {
             services.AddSingleton<Widgets.Clock.ClockWidgetService>();
             services.AddScoped<EditModeService>();
-            services.AddSingleton<LayoutService>();
+            services.AddSingleton<StructureService>();
             services.AddSingleton<SortableListService>();
             services.AddSingleton<WidgetTypeService>();
 
