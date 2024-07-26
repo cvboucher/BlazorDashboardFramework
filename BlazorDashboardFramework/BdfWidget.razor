@@ -7,50 +7,49 @@
             <div class="card-header hover-container">
                 @(Widget.Title)
                 <div class="float-end hover-effect fs-6">
-                    @* <a href="" class="ms-1" title="Reload widget content" @onclick="@ReloadWidgetContent" @onclick:preventDefault>
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </a> *@
                     @if (editModeService.EditMode)
                     {
-                        <a href="" class="ms-1 drag-handle" title="Change widget location">
+                        <button type="button" class="btn btn-link btn-sm drag-handle" title="Change widget location">
                             <i class="bi bi-arrows-move"></i>
-                        </a>
+                         </button>
                     }
-                    <a title="@(Collapsed ? "Expand widget" : "Collapse widget")"
-                       href="" class="ms-1"
-                       @onclick="@ExpandCollapseWidget" @onclick:preventDefault>
+                    @if (isIRefresh)
+                    {
+                        <button type="button" class="btn btn-link btn-sm" @onclick="@RefreshContent" title="Refresh Content">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    }
+                    <button type="button" class="btn btn-link btn-sm" @onclick="@ExpandCollapseWidget" title="Expand/Collapse Widget">
                         <i class="bi @(Collapsed ? "bi-caret-right-fill" : "bi-caret-down-fill")"></i>
-                    </a>
+                    </button>
+
                     @if (editModeService.EditMode)
                     {
-                        <a href="" class="ms-1" title="Copy Widget" @onclick="@CopyWidget" @onclick:preventDefault>
+                        <button type="button" class="btn btn-link btn-sm" @onclick="@CopyWidget" title="Copy Widget">
                             <i class="bi bi-copy"></i>
-                        </a>
-                        <a href="" class="ms-1" title="Edit widget configuration" @onclick="@EditWidgetConfiguration" @onclick:preventDefault>
+                        </button>
+                        <button type="button" class="btn btn-link btn-sm" @onclick="@EditWidgetConfiguration" title="Edit widget configuration">
                             <i class="bi bi-gear-fill"></i>
-                        </a>
-                        <a href="" class="ms-1" title="Remove widget" @onclick="@RemoveWidget" @onclick:preventDefault>
+                        </button>
+                        <button type="button" class="btn btn-link btn-sm" @onclick="@RemoveWidget" title="Remove widget">
                             <i class="bi bi-trash3-fill"></i>
-                        </a>
+                        </button>
                     }
                 </div>
             </div>
         }
-        @if (!collapsed)
-        {
-            <div class="card-body">
-                @if (widgetParameters != null && widgetType != null)
-                {
-                        <CascadingValue Value="@this">
-                            <DynamicComponent Type="@widgetType.DisplayComponent" Parameters="widgetParameters" />
-                        </CascadingValue>
-                }
-                else
-                {
-                    <h1>@Widget.Type</h1>
-                }
-            </div>
-        }
+        <div class="@(collapsed ? "d-none" : null) card-body">
+            @if (widgetParameters != null && widgetType != null)
+            {
+                    <CascadingValue Value="@this">
+                    <DynamicComponent @ref="dynamicComponentRef" Type="@widgetType.DisplayComponent" Parameters="widgetParameters" />
+                    </CascadingValue>
+            }
+            else
+            {
+                <h1>@Widget.Type</h1>
+            }
+        </div>
     </div>
 }
 
@@ -74,6 +73,15 @@
     private BdfWidgetConfigForm? bdfWidgetConfigForm;
     private WidgetType? widgetType;
 
+    private DynamicComponent? dynamicComponentRef;
+
+    private bool isIRefresh => widgetType != null && typeof(IRefresh).IsAssignableFrom(widgetType.DisplayComponent);
+
+    private async Task RefreshContent()
+    {
+        if (dynamicComponentRef?.Instance != null && isIRefresh)
+            await ((IRefresh)dynamicComponentRef.Instance).Refresh();
+    }
 
     protected override void OnInitialized()
     {
