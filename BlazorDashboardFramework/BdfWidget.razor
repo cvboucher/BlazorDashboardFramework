@@ -9,29 +9,29 @@
                 <div class="float-end hover-effect fs-6">
                     @if (editModeService.EditMode)
                     {
-                        <button type="button" class="btn btn-link btn-sm drag-handle" title="Change widget location">
+                        <button type="button" class="btn btn-link btn-xs drag-handle" title="Change widget location">
                             <i class="bi bi-arrows-move"></i>
                          </button>
                     }
                     @if (isIRefresh)
                     {
-                        <button type="button" class="btn btn-link btn-sm" @onclick="@RefreshContent" title="Refresh Content">
+                        <button type="button" class="btn btn-link btn-xs" @onclick="@RefreshContent" title="Refresh Content">
                             <i class="bi bi-arrow-clockwise"></i>
                         </button>
                     }
-                    <button type="button" class="btn btn-link btn-sm" @onclick="@ExpandCollapseWidget" title="Expand/Collapse Widget">
+                    <button type="button" class="btn btn-link btn-xs" @onclick="@ExpandCollapseWidget" title="Expand/Collapse Widget">
                         <i class="bi @(Collapsed ? "bi-caret-right-fill" : "bi-caret-down-fill")"></i>
                     </button>
 
                     @if (editModeService.EditMode)
                     {
-                        <button type="button" class="btn btn-link btn-sm" @onclick="@CopyWidget" title="Copy Widget">
+                        <button type="button" class="btn btn-link btn-xs" @onclick="@CopyWidget" title="Copy Widget">
                             <i class="bi bi-copy"></i>
                         </button>
-                        <button type="button" class="btn btn-link btn-sm" @onclick="@EditWidgetConfiguration" title="Edit widget configuration">
+                        <button type="button" class="btn btn-link btn-xs" @onclick="@EditWidgetConfiguration" title="Edit widget configuration">
                             <i class="bi bi-gear-fill"></i>
                         </button>
-                        <button type="button" class="btn btn-link btn-sm" @onclick="@RemoveWidget" title="Remove widget">
+                        <button type="button" class="btn btn-link btn-xs" @onclick="@RemoveWidget" title="Remove widget">
                             <i class="bi bi-trash3-fill"></i>
                         </button>
                     }

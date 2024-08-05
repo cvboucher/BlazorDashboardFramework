@@ -5,3 +5,9 @@
 .hover-container:hover .hover-effect {
     display: inline;
 }
+
+.btn-xs {
+    --bs-btn-padding-y: .1rem;
+    --bs-btn-padding-x: .4rem;
+    --bs-btn-font-size: .7rem;
+}
