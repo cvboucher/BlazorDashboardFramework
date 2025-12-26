@@ -1,44 +1,55 @@
 ﻿@implements IDisposable
 @if (!HideWidget || editModeService.EditMode)
 {
-    <div class="card mt-1 mb-3">
-        @if (!HideHeader || editModeService.EditMode)
-        {
-            <div class="card-header hover-container">
-                @(Widget.Title)
-                <div class="float-end hover-effect fs-6">
-                    @if (editModeService.EditMode)
-                    {
-                        <button type="button" class="btn btn-link btn-xs drag-handle" title="Change widget location">
-                            <i class="bi bi-arrows-move"></i>
-                         </button>
-                    }
-                    @if (isIRefresh)
-                    {
-                        <button type="button" class="btn btn-link btn-xs" @onclick="@RefreshContent" title="Refresh Content">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
-                    }
-                    <button type="button" class="btn btn-link btn-xs" @onclick="@ExpandCollapseWidget" title="Expand/Collapse Widget">
-                        <i class="bi @(Collapsed ? "bi-caret-right-fill" : "bi-caret-down-fill")"></i>
-                    </button>
+    <RadzenCard Variant="Variant.Filled">
+        <RadzenStack Orientation="Orientation.Vertical">
+            @if (!HideHeader || editModeService.EditMode)
+            {
+                <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" class="card-header hover-container">
+                    <h5>@(Widget.Title)</h5>
 
-                    @if (editModeService.EditMode)
-                    {
-                        <button type="button" class="btn btn-link btn-xs" @onclick="@CopyWidget" title="Copy Widget">
-                            <i class="bi bi-copy"></i>
-                        </button>
-                        <button type="button" class="btn btn-link btn-xs" @onclick="@EditWidgetConfiguration" title="Edit widget configuration">
-                            <i class="bi bi-gear-fill"></i>
-                        </button>
-                        <button type="button" class="btn btn-link btn-xs" @onclick="@RemoveWidget" title="Remove widget">
-                            <i class="bi bi-trash3-fill"></i>
-                        </button>
-                    }
-                </div>
-            </div>
-        }
-        <div class="@(collapsed ? "d-none" : null) card-body">
+                    <div class="float-end hover-effect fs-6">
+                        <RadzenIcon Icon="drag_pan" title="Change widget location" IconStyle="IconStyle.Base" class="drag-handle" Visible="editModeService.EditMode" />
+                        @*@if (editModeService.EditMode)
+                        {
+                            
+                             <button type="button" class="btn btn-link btn-xs drag-handle" title="Change widget location">
+                                <i class="bi bi-arrows-move"></i>
+                             </button> 
+                        }*@
+                        <RadzenButton Icon="refresh" title="Refresh content" ButtonStyle="ButtonStyle.Base" Click="RefreshContent" Visible="@isIRefresh" />
+                        @* @if (isIRefresh)
+                        { 
+                            
+@*                             <button type="button" class="btn btn-link btn-xs" @onclick="@RefreshContent" title="Refresh Content">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button> 
+                        }*@
+                        <RadzenButton Icon="@(Collapsed ? "arrow-right" : "arrow_drop_down")" title="Expand/collapse widget" Click="ExpandCollapseWidget" ButtonStyle="ButtonStyle.Base" />
+@*                         <button type="button" class="btn btn-link btn-xs" @onclick="@ExpandCollapseWidget" title="Expand/Collapse Widget">
+                            <i class="bi @(Collapsed ? "bi-caret-right-fill" : "bi-caret-down-fill")"></i>
+                        </button> *@
+                        <RadzenButton Icon="copy" title="Copy widget" Click="CopyWidget" ButtonStyle="ButtonStyle.Base" Visible="editModeService.EditMode" />
+                        <RadzenButton Icon="settings" title="Edit widget configuration" Click="EditWidgetConfiguration" ButtonStyle="ButtonStyle.Base" Visible="editModeService.EditMode" />
+                        <RadzenButton Icon="delete" title="Remove widget" Click="RemoveWidget" ButtonStyle="ButtonStyle.Base" Visible="editModeService.EditMode" />
+
+
+                        @* @if (editModeService.EditMode)
+                        {
+                            <button type="button" class="btn btn-link btn-xs" @onclick="@CopyWidget" title="Copy Widget">
+                                <i class="bi bi-copy"></i>
+                            </button>
+                            <button type="button" class="btn btn-link btn-xs" @onclick="@EditWidgetConfiguration" title="Edit widget configuration">
+                                <i class="bi bi-gear-fill"></i>
+                            </button>
+                            <button type="button" class="btn btn-link btn-xs" @onclick="@RemoveWidget" title="Remove widget">
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                        } *@
+                    </div>
+                    </RadzenStack>
+            }
+            <div class="@(collapsed ? "d-none" : null) card-body">
             @if (widgetParameters != null && widgetType != null)
             {
                     <CascadingValue Value="@this">
@@ -50,7 +61,8 @@
                 <h1>@Widget.Type</h1>
             }
         </div>
-    </div>
+        </RadzenStack>
+    </RadzenCard>
 }
 
 @if (editModeService.EditMode)

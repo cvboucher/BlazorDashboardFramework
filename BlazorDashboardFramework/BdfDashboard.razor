@@ -1,44 +1,30 @@
 ﻿@using System.Text.Json
 @implements IDisposable
-@if (Value != null)
-{
+
 <h1 class="dashboard-header">
-    <span class="dashboard-tile">@Value?.Title</span>
+    <span class="dashboard-title">@Value?.Title</span>
     <span class="float-end">
         @if (editModeService.EditMode)
         {
-            <a href="" title="Add new widget" @onclick="@AddNewWidget" @onclick:preventDefault>
-                <i class="@AddWidgetIconCss"></i>
-            </a>
-            <a href="" title="Edit dashboard" @onclick="@EditDashboard" @onclick:preventDefault>
-                <i class="@EditDashbaordIconCss"></i>
-            </a>
-            <a href="" title="Save dashboard" @onclick="@SaveChanges" @onclick:preventDefault>
-                <i class="@SaveDashboardIconCss"></i>
-            </a>
-            <a href="" title="Delete this dashboard" @onclick="@DeleteDashboard" @onclick:preventDefault>
-                <i class="@DeleteDashboardIconCss"></i>
-            </a>
-            <a href="" title="Cancel changes" @onclick="@CancelChanges" @onclick:preventDefault>
-                <i class="@CancelChangesIconCss"></i>
-            </a>
+            <RadzenStack Orientation="Orientation.Horizontal">
+                <RadzenButton Icon="add_box" Click="AddNewWidget" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" title="Add new widget" />
+                <RadzenButton Icon="settings" Click="EditDashboard" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" title="Edit dashboard" />
+                <RadzenButton Icon="save" Click="SaveChanges" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" title="Save dashboard" />
+                <RadzenButton Icon="delete" Click="DeleteDashboard" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" title="Delete this dashboard" />
+                <RadzenButton Icon="cancel" Click="CancelChanges" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" title="Cancel changes" />
+            </RadzenStack>
         }
-        else
+        else if (!ReadOnly)
         {
-            @if (!ReadOnly)
-            {
-                <a href="" title="Enable edit mode" @onclick="@EnableEditMode" @onclick:preventDefault>
-                    <i class="@EditModeIconCss"></i>
-                </a>
-            }
-                
+                <RadzenStack Orientation="Orientation.Horizontal">
+                    <RadzenButton Icon="edit_square" Click="EnableEditMode" ButtonStyle="ButtonStyle.Base" Variant="Variant.Outlined" title="Enable edit mode" />
+                </RadzenStack>
         }
     </span>
 </h1>
 <CascadingValue Value="Value">
     <BdfRows Rows="@Value?.Rows" />
 </CascadingValue>
-}
 @if (editModeService.EditMode)
 {
     <BdfDashboardForm @bind-Dashboard="@Value" @ref="@bdfDashboardForm" />
@@ -46,15 +32,15 @@
 }
 
 @code {
-    [Parameter] public Dashboard? Value { get; set; } = default!;
+    [Parameter] public Dashboard Value { get; set; } = new();
     [Parameter] public EventCallback<Dashboard> ValueChanged { get; set; }
     [Parameter] public bool ReadOnly { get; set; }
-    [Parameter] public string AddWidgetIconCss { get; set; } = "bi bi-plus-square";
-    [Parameter] public string EditDashbaordIconCss { get; set; } = "bi bi-gear";
-    [Parameter] public string SaveDashboardIconCss { get; set; } = "bi bi-save";
-    [Parameter] public string DeleteDashboardIconCss { get; set; } = "bi bi-trash";
-    [Parameter] public string CancelChangesIconCss { get; set; } = "bi bi-x-square";
-    [Parameter] public string EditModeIconCss { get; set; } = "bi bi-pencil-square";
+    // [Parameter] public string AddWidgetIconCss { get; set; } = "bi bi-plus-square";
+    // [Parameter] public string EditDashbaordIconCss { get; set; } = "bi bi-gear";
+    // [Parameter] public string SaveDashboardIconCss { get; set; } = "bi bi-save";
+    // [Parameter] public string DeleteDashboardIconCss { get; set; } = "bi bi-trash";
+    // [Parameter] public string CancelChangesIconCss { get; set; } = "bi bi-x-square";
+    // [Parameter] public string EditModeIconCss { get; set; } = "bi bi-pencil-square";
     [Parameter] public EventCallback<Dashboard> OnDashboardSaved { get; set; }
     [Parameter] public EventCallback<Dashboard> OnDashboardDeleted { get; set; }
     [Parameter] public string? DefaultLayout { get; set; }

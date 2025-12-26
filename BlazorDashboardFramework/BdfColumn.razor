@@ -1,5 +1,6 @@
 ﻿@implements IDisposable
-<div class="column @Column.StyleClass @GetEditModeClass()">
+@using Radzen.Blazor
+<RadzenColumn class="@($"{Column.StyleClass} {GetEditModeClass()}")">
     @if (Column.Rows.Any())
     {
         <BdfRows @bind-Rows="@Column.Rows" />
@@ -28,8 +29,7 @@
             <BdfWidget @key=@Column.Widgets[c].WidgetInstanceId @bind-Widget="Column.Widgets[c]" />
         }
     }
-</div>
-
+</RadzenColumn>
 @code {
     [CascadingParameter] Dashboard dashboard { get; set; } = default!;
     [Parameter, EditorRequired] public Column Column { get; set; } = default!;

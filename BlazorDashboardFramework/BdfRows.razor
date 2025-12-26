@@ -1,8 +1,10 @@
-﻿@foreach (var row in Rows)
+﻿@using Radzen
+@using Radzen.Blazor
+@foreach (var row in Rows)
 {
-    <div class="row @row.StyleClass">
+    <RadzenRow class="@row.StyleClass">
         <BdfColumns @bind-Columns="row.Columns" />
-    </div>
+    </RadzenRow>
 }
 
 @code {
