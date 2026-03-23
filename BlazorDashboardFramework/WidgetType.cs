@@ -15,7 +15,7 @@ namespace BlazorDashboardFramework
         required public Type DisplayComponent { get; set; }
         public Type? EditComponent { get; set; }
         public Type? ConfigType { get; set; }
-        public JsonElement? Config { get; set; }
+        //public JsonElement? Config { get; set; }
         public bool HideWidget { get; set; }
         public bool HideHeader { get; set; }
         public bool Collapsed { get; set; }
@@ -23,75 +23,100 @@ namespace BlazorDashboardFramework
 
         public WidgetInstance GetInstance()
         {
-            return new WidgetInstance()
+            var widget = new WidgetInstance()
             {
                 Type = this.Type,
                 Title = this.Title,
-                Config = this.Config
+                //Config = this.Config
             };
+            if (this.ConfigType != null)
+                widget.Config = JsonSerializer.SerializeToElement(widget.GetConfig(this.ConfigType));
+            return widget;
         }
 
-        public object? GetConfig(JsonElement? jsonElement)
-        {
-            if (ConfigType == null)
-                return null;
-            try
-            {
-                if (jsonElement == null)
-                    return Activator.CreateInstance(ConfigType);
-                else
-                    return JsonSerializer.Deserialize(jsonElement.Value, ConfigType, new JsonSerializerOptions()
-                    {
-                        PropertyNameCaseInsensitive = true,
-                    }) 
-                        ?? Activator.CreateInstance(ConfigType);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return Activator.CreateInstance(ConfigType);
-            }
-        }
+        //public T GetConfig<T>(JsonElement? jsonElement) where T : class
+        //    {
+        //    if (ConfigType == null || typeof(T) != ConfigType)
+        //        return Activator.CreateInstance<T>();
+        //    try
+        //    {
+        //        if (Config == null)
+        //            return Activator.CreateInstance<T>();
+        //        else
+        //            return JsonSerializer.Deserialize<T>(Config.Value, new JsonSerializerOptions()
+        //            {
+        //                PropertyNameCaseInsensitive = true,
+        //            }) 
+        //                ?? Activator.CreateInstance<T>();
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.ToString());
+        //        return Activator.CreateInstance<T>();
+        //    }
+        //}
 
-        public object? GetConfig(JsonDocument? jsonDocument)
-        {
-            if (ConfigType == null)
-                return null;
-            try
-            {
-                if (jsonDocument == null)
-                    return Activator.CreateInstance(ConfigType);
-                else
-                    return jsonDocument.Deserialize(ConfigType, new JsonSerializerOptions()
-                    {
-                        PropertyNameCaseInsensitive = true,
-                    }) // .DeserializeFromCamelCase(ConfigType) //  JsonSerializer.Deserialize(json.Replace("u022", "\""), ConfigType)
-                        ?? Activator.CreateInstance(ConfigType);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return Activator.CreateInstance(ConfigType);
-            }
-        }
-        public object? GetConfig(string? json)
-        {
-            if (ConfigType == null)
-                return null;
-            try
-            {
+        //public object? GetConfig(JsonElement? jsonElement)
+        //{
+        //    if (ConfigType == null)
+        //        return null;
+        //    try
+        //    {
+        //        if (jsonElement == null)
+        //            return Activator.CreateInstance(ConfigType);
+        //        else
+        //            return JsonSerializer.Deserialize(jsonElement.Value, ConfigType, new JsonSerializerOptions()
+        //            {
+        //                PropertyNameCaseInsensitive = true,
+        //            }) 
+        //                ?? Activator.CreateInstance(ConfigType);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.ToString());
+        //        return Activator.CreateInstance(ConfigType);
+        //    }
+        //}
 
-                if (string.IsNullOrWhiteSpace(json))
-                    return Activator.CreateInstance(ConfigType);
-                else
-                    return json.DeserializeFromCamelCase(ConfigType) //  JsonSerializer.Deserialize(json.Replace("u022", "\""), ConfigType)
-                        ?? Activator.CreateInstance(ConfigType);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-                return Activator.CreateInstance(ConfigType);
-            }
-        }
+        //public object? GetConfig(JsonDocument? jsonDocument)
+        //{
+        //    if (ConfigType == null)
+        //        return null;
+        //    try
+        //    {
+        //        if (jsonDocument == null)
+        //            return Activator.CreateInstance(ConfigType);
+        //        else
+        //            return jsonDocument.Deserialize(ConfigType, new JsonSerializerOptions()
+        //            {
+        //                PropertyNameCaseInsensitive = true,
+        //            }) // .DeserializeFromCamelCase(ConfigType) //  JsonSerializer.Deserialize(json.Replace("u022", "\""), ConfigType)
+        //                ?? Activator.CreateInstance(ConfigType);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.ToString());
+        //        return Activator.CreateInstance(ConfigType);
+        //    }
+        //}
+        //public object? GetConfig(string? json)
+        //{
+        //    if (ConfigType == null)
+        //        return null;
+        //    try
+        //    {
+
+        //        if (string.IsNullOrWhiteSpace(json))
+        //            return Activator.CreateInstance(ConfigType);
+        //        else
+        //            return json.DeserializeFromCamelCase(ConfigType) //  JsonSerializer.Deserialize(json.Replace("u022", "\""), ConfigType)
+        //                ?? Activator.CreateInstance(ConfigType);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine(ex.ToString());
+        //        return Activator.CreateInstance(ConfigType);
+        //    }
+        //}
     }
 }

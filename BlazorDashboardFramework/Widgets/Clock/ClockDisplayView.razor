@@ -1,27 +1,93 @@
 ﻿@implements IDisposable
-<div class="text-center fs-2">@clockWidgetService.CurrentDateTime.ToString(GetClockFormat())</div>
+<div class="text-center fs-2">@GetClockString()</div>
 @code {
     [CascadingParameter] public BdfWidget bdfWidget { get; set; } = default!;
-    [Parameter] public ClockConfig Config { get; set; } = default!;
+    [CascadingParameter] public WidgetInstance WidgetInstance { get; set; } = default!;
+    [CascadingParameter] public WidgetType widgetType { get; set; } = default!;
+    //[Parameter] public ClockConfig Config { get; set; } = default!;
+    //[CascadingParameter(Name = "Config")] public object ConfigObject { get; set; } = default!;
+    // public ClockConfig Config => ConfigObject is ClockConfig 
+    //     ? (ClockConfig)ConfigObject
+    //     : new ClockConfig();
+
     [Inject] ClockWidgetService clockWidgetService { get; set; } = default!;
+    //[Inject] WidgetTypeService widgetTypeService { get; set; } = default!;
+    [Inject] public EditModeService editModeService { get; set; } = default!;
 
     //private bool ranOnce;
 
+    private ClockConfig? Config;
+
     protected override void OnInitialized()
     {
-        clockWidgetService.CurrentDateTimeChanged += OnCurrentDateTimeChanged;
+        clockWidgetService.CurrentDateTimeChanged += ClockWidgetService_OnCurrentDateTimeChanged;
+        WidgetInstance.ConfigChanged += WidgetInstance_OnConfigChanged;
+        editModeService.EditModeChanged += EditModeService_OnEditModeChanged;
         base.OnInitialized();
     }
 
-    protected override async Task OnParametersSetAsync()
+    protected override void OnParametersSet()
     {
-        if (bdfWidget != null && Config.HideHeader != bdfWidget.HideHeader)
+        try
         {
-            bdfWidget.HideHeader = Config.HideHeader;
-            await InvokeAsync(() => StateHasChanged());
+            if (Config == null)
+            {
+                LoadConfig();
+            }
         }
-        await base.OnParametersSetAsync();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in ClockDisplayView OnParametersSetAsync: {ex}");
+        }
+        finally
+        {
+            base.OnParametersSet();
+        }
+        
     }
+
+    // protected override async Task OnParametersSetAsync()
+    // {
+    //     try
+    //     {
+    //         if (Config == null)
+    //         {
+    //             LoadConfig();
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"Error in ClockDisplayView OnParametersSetAsync: {ex}");
+    //     }
+    //     finally
+    //     {
+            
+    //     }
+    //     // if (bdfWidget != null && Config.HideHeader != bdfWidget.HideHeader)
+    //     // {
+    //     //     bdfWidget.HideHeader = Config.HideHeader;
+    //     //     await InvokeAsync(() => StateHasChanged());
+    //     // }
+    //     // await base.OnParametersSetAsync();
+    // }
+
+    private void LoadConfig()
+    {
+        Config = WidgetInstance.GetConfig<ClockConfig>();
+    }
+
+    private void WidgetInstance_OnConfigChanged(object? sender, EventArgs e)
+    {
+        LoadConfig();
+        InvokeAsync(() => StateHasChanged());
+    }
+
+    private void EditModeService_OnEditModeChanged(object? sender, EventArgs e)
+    {
+        LoadConfig();
+        InvokeAsync(() => StateHasChanged());
+    }
+
 
     private string GetClockFormat()
     {
@@ -30,13 +96,27 @@
             : Config.Format;
     }
 
-    private async void OnCurrentDateTimeChanged(object? sender, DateTime e)
+    private string GetClockString()
+    {
+        try
+        {
+            return clockWidgetService.CurrentDateTime.ToString(GetClockFormat());
+        }
+        catch (Exception)
+        {
+            return clockWidgetService.CurrentDateTime.ToString("T");
+        }
+    }
+
+    private async void ClockWidgetService_OnCurrentDateTimeChanged(object? sender, DateTime e)
     {
         await InvokeAsync(() => StateHasChanged());
     }
       
     public void Dispose()
     {
-        clockWidgetService.CurrentDateTimeChanged -= OnCurrentDateTimeChanged;
+        clockWidgetService.CurrentDateTimeChanged -= ClockWidgetService_OnCurrentDateTimeChanged;
+        WidgetInstance.ConfigChanged -= WidgetInstance_OnConfigChanged;
+        editModeService.EditModeChanged -= EditModeService_OnEditModeChanged;
     }
 }

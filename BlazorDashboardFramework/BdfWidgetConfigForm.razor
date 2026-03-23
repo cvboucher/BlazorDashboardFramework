@@ -15,9 +15,9 @@
                     <InputText @bind-Value=@WidgetInstance.Title
                                class="form-control" />
                 </div>
-                @if (widgetType != null && widgetType.EditComponent != null && dynamicComponentParameters != null)
+                @if (widgetType != null && widgetType.EditComponent != null )
                 {
-                    <DynamicComponent Type="widgetType.EditComponent" Parameters="dynamicComponentParameters" />
+                    <DynamicComponent Type="widgetType.EditComponent" Parameters="parameters" />
                 }
                 <div class="float-end">
                     <button type="submit" class="btn btn-primary">Save</button>
@@ -28,16 +28,18 @@
     </BodyContent>
 </BootstrapModal>
 @code {
-    [Parameter] public WidgetInstance WidgetInstance { get; set; } = default!;
-    [Parameter] public EventCallback<WidgetInstance> WidgetInstanceChanged { get; set; } 
+    [CascadingParameter] public WidgetInstance WidgetInstance { get; set; } = default!;
+    [CascadingParameter] public WidgetType widgetType { get; set; } = default!;
+    [CascadingParameter] public BdfWidget bdfWidget { get; set; } = default!;
+    //[Parameter] public EventCallback<WidgetInstance> WidgetInstanceChanged { get; set; } 
 
-    [Inject] public WidgetTypeService widgetTypeService { get; set; } = default!;
+    //[Inject] public WidgetTypeService widgetTypeService { get; set; } = default!;
 
     private BootstrapModal modalDialog { get; set; } = default!;
-    private EditContext editContext = default!;
-    private WidgetType? widgetType;
-    private object? configObject;
-    private Dictionary<string, object> dynamicComponentParameters = default!;
+    private EditContext? editContext = default!;
+    //private WidgetType? widgetType;
+    //private object? configObject;
+    private Dictionary<string, object> parameters = new();
 
     public async Task Open()
     {
@@ -47,16 +49,35 @@
     private async Task Close()
     {
         await modalDialog.Close();
+        editContext = null;
+        parameters.Clear();
     }
 
     private async Task OnValidSubmitClicked()
     {
-        if (configObject != null)
-            WidgetInstance.Config = JsonSerializer.SerializeToElement(configObject, new JsonSerializerOptions()
+        if (parameters.ContainsKey("Config"))
+        {
+            var configObject = parameters["Config"];
+            if (configObject != null)
             {
-               PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            }); 
-        await WidgetInstanceChanged.InvokeAsync(WidgetInstance);
+                WidgetInstance.Config = JsonSerializer.SerializeToElement(configObject, new JsonSerializerOptions()
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+                WidgetInstance.OnConfigChanged();
+                //bdfWidget.LoadWidgetConfig();
+            }
+        }
+        // if (configObject != null)
+        // {
+        //     WidgetInstance.Config = JsonSerializer.SerializeToElement(configObject, new JsonSerializerOptions()
+        //     {
+        //         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        //     });
+        //     WidgetInstance.OnConfigChanged();
+        //     //bdfWidget.LoadWidgetConfig();
+        // }
+        //await WidgetInstanceChanged.InvokeAsync(WidgetInstance);
         await Close();
     }
 
@@ -70,18 +91,19 @@
         await Task.Delay(0);
         try
         {
-            widgetType = widgetTypeService.GetWidgetType(WidgetInstance.Type)
-                ?? throw new Exception($"WidgetType {WidgetInstance.Type} not found.");
             editContext = new EditContext(WidgetInstance);
-            if (widgetType.ConfigType == null)
-                return;
-            configObject = widgetType.GetConfig(WidgetInstance.Config);
-            //editContext = new EditContext(configObject ?? WidgetInstance);
-            if (configObject != null)
-                dynamicComponentParameters = new Dictionary<string, object>()
-                {
-                    { "Config", configObject}
-                };
+            parameters = new();
+            if (widgetType.ConfigType != null)
+            {
+                // var configType = Type.GetType(widgetType.ConfigType.AssemblyQualifiedName!)
+                //     ?? throw new Exception($"Unable to find type: {widgetType.ConfigType.AssemblyQualifiedName}");
+                var configObject = WidgetInstance.GetConfig(widgetType.ConfigType);
+                if (configObject != null)  
+                    parameters.Add("Config", configObject);
+            }
+            
+            //configObject = widgetType.GetConfig(WidgetInstance.Config);
+            //if (configObject != null)
         }
         catch (Exception ex)
         {

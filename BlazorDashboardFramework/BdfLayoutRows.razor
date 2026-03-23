@@ -2,9 +2,9 @@
 {
     @if (row.Columns.Any())
     {
-        <RadzenRow class="@row.StyleClass" Style="@RowStyle()">
+        <div class="@($"row {row.StyleClass}")" Style="@RowStyle()">
             <BdfLayoutColumns Columns="@row.Columns" />
-        </RadzenRow>
+        </div>
     }
     
 }

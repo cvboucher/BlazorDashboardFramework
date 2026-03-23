@@ -9,4 +9,6 @@
 
 @code {
     [Parameter] public ClockConfig Config { get; set; } = default!;
+    // [CascadingParameter(Name = "Config")] public object ConfigObject { get; set; } = default!;
+    // public ClockConfig Config => (ClockConfig)ConfigObject;
 }
