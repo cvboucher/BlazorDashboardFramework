@@ -31,12 +31,12 @@ namespace BlazorDashboardFramework
             return JsonSerializer.Serialize(data, DefaultJsonSerializerOptions);
         }
 
-        public static T DeserializeFromCamelCase<T>(this string json)
+        public static T? DeserializeFromCamelCase<T>(this string json)
         {
             return JsonSerializer.Deserialize<T>(json, DefaultJsonSerializerOptions);
         }
 
-        public static object DeserializeFromCamelCase(this string json, Type type)
+        public static object? DeserializeFromCamelCase(this string json, Type type)
         {
             return JsonSerializer.Deserialize(json, type, DefaultJsonSerializerOptions);
         }

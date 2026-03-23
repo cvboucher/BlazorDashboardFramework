@@ -1,12 +1,29 @@
-﻿@for (var i = 0; i < Columns.Count; i++)
+﻿@if (row != null)
 {
-    var column = Columns[i];
-    <CascadingValue Value="this">
-        <BdfColumn @bind-Column=@column @key=@column.ColumnId />
-    </CascadingValue>
+    @* @for (var i = 0; i < row.Columns.Count; i++) *@
+    @foreach (var column in row.Columns)
+    {
+        @* var column = row.Columns[i]; *@
+        <CascadingValue Value="this">
+            <CascadingValue Value="column">
+                <BdfColumn @key=@column.ColumnId />
+            </CascadingValue>
+        </CascadingValue>
+    }
 }
 
+
 @code {
-    [Parameter, EditorRequired] public List<Column> Columns { get; set; } = default!;
-    [Parameter] public EventCallback<List<Column>> ColumnsChanged { get; set; }
+    [CascadingParameter] Dashboard dashboard { get; set; } = default!;
+    [CascadingParameter] BdfDashboard bdfDashboard { get; set; } = default!;
+    [CascadingParameter] BdfRows bdfRows { get; set; } = default!;
+    [CascadingParameter] Row row { get; set; } = default!;
+
+    public async Task StateChanged()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    // [Parameter, EditorRequired] public List<Column> Columns { get; set; } = default!;
+    // [Parameter] public EventCallback<List<Column>> ColumnsChanged { get; set; }
 }

@@ -2,7 +2,7 @@
 {
     @if (row.Columns.Any())
     {
-        <div class="row @row.StyleClass" style="@RowStyle()">
+        <div class="@($"row {row.StyleClass}")" Style="@RowStyle()">
             <BdfLayoutColumns Columns="@row.Columns" />
         </div>
     }

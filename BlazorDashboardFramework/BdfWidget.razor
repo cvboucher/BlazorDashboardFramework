@@ -1,77 +1,83 @@
 ﻿@implements IDisposable
-@if (!HideWidget || editModeService.EditMode)
-{
-    <div class="card mt-1 mb-3">
-        @if (!HideHeader || editModeService.EditMode)
+<CascadingValue Value="@this">
+    <CascadingValue Value="widgetType">
+        @if (!HideWidget || editModeService.EditMode)
         {
-            <div class="card-header hover-container">
-                @(Widget.Title)
-                <div class="float-end hover-effect fs-6">
-                    @if (editModeService.EditMode)
-                    {
-                        <button type="button" class="btn btn-link btn-xs drag-handle" title="Change widget location">
-                            <i class="bi bi-arrows-move"></i>
-                         </button>
-                    }
-                    @if (isIRefresh)
-                    {
-                        <button type="button" class="btn btn-link btn-xs" @onclick="@RefreshContent" title="Refresh Content">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
-                    }
-                    <button type="button" class="btn btn-link btn-xs" @onclick="@ExpandCollapseWidget" title="Expand/Collapse Widget">
-                        <i class="bi @(Collapsed ? "bi-caret-right-fill" : "bi-caret-down-fill")"></i>
-                    </button>
 
-                    @if (editModeService.EditMode)
+            <div class="card mb-3">
+                @if (!HideHeader || editModeService.EditMode)
+                {
+                    <div class="card-header hover-container d-flex justify-content-between">
+                        <h5>@Widget.Title</h5>
+
+                        <div class="float-end hover-effect fs-6">
+                            @if (editModeService.EditMode)
+                            {
+                                <i class="bi bi-arrows-move drag-handle btn btn-sm btn-outline-secondary" title="Change widget location"></i>
+                                <button class="btn btn-sm btn-outline-secondary" title="Copy widget" @onclick="CopyWidget"><i class="bi bi-copy"></i></button>
+                                <button class="btn btn-sm btn-outline-secondary" title="Edit widget configuration" @onclick="EditWidgetConfiguration"><i class="bi bi-gear"></i></button>
+                                <button class="btn btn-sm btn-outline-secondary" title="Remove widget" @onclick="RemoveWidget"><i class="bi bi-trash"></i></button>
+                            }
+                            else
+                            {
+                                if (isIRefresh)
+                                {
+                                    <button class="btn btn-sm btn-outline-secondary" Icon="refresh" title="Refresh content" @onclick="RefreshContent"><i class="bi bi-arrow-clockwise"></i></button>
+                                }
+                                <button class="btn btn-sm btn-outline-secondary" title="Expand/collapse widget" @onclick="ExpandCollapseWidget"><i class="@($"bi {(Collapsed ? "bi-chevron-right" : "bi-chevron-down")}")"></i></button>
+                            }
+                        </div>
+                    </div>
+                }
+                <div class="@(Collapsed ? "d-none" : null) card-body">
+                    @if (widgetType != null)
                     {
-                        <button type="button" class="btn btn-link btn-xs" @onclick="@CopyWidget" title="Copy Widget">
-                            <i class="bi bi-copy"></i>
-                        </button>
-                        <button type="button" class="btn btn-link btn-xs" @onclick="@EditWidgetConfiguration" title="Edit widget configuration">
-                            <i class="bi bi-gear-fill"></i>
-                        </button>
-                        <button type="button" class="btn btn-link btn-xs" @onclick="@RemoveWidget" title="Remove widget">
-                            <i class="bi bi-trash3-fill"></i>
-                        </button>
+                        @* if (widgetType.ConfigType == null)
+                        { *@
+                            <DynamicComponent @ref="dynamicComponentRef" Type="@widgetType.DisplayComponent" @key="@($"{Widget.WidgetInstanceId}-DisplayComponent")" />  @* Parameters = "widgetParameters" *@
+                        @* }
+                        else
+                        {
+                            <CascadingValue Value="configObject" Name="Config">
+                                <DynamicComponent @ref="dynamicComponentRef" Type="@widgetType.DisplayComponent" @key="@($"{Widget.WidgetInstanceId}-DisplayComponent")" />
+                            </CascadingValue>
+                        } *@
+                    }
+                    else
+                    {
+                        <h1>@Widget.Type</h1>
                     }
                 </div>
             </div>
+
         }
-        <div class="@(collapsed ? "d-none" : null) card-body">
-            @if (widgetParameters != null && widgetType != null)
-            {
-                    <CascadingValue Value="@this">
-                    <DynamicComponent @ref="dynamicComponentRef" Type="@widgetType.DisplayComponent" Parameters="widgetParameters" />
-                    </CascadingValue>
-            }
-            else
-            {
-                <h1>@Widget.Type</h1>
-            }
-        </div>
-    </div>
-}
-
-@if (editModeService.EditMode)
-{
-    <BdfWidgetConfigForm WidgetInstance="@Widget" 
-                         @ref="@bdfWidgetConfigForm" 
-                         WidgetInstanceChanged="OnWidgetInstanceChanged" />
-}
-
+        @if (editModeService.EditMode)
+        {
+            <BdfWidgetConfigForm @ref="@bdfWidgetConfigForm" /> @* WidgetInstanceChanged="OnWidgetInstanceChanged" /> *@
+        }
+    </CascadingValue>
+</CascadingValue>
 @code {
-    [Parameter, EditorRequired] public WidgetInstance Widget { get; set; } = default!;
-    [Parameter] public EventCallback<WidgetInstance> WidgetChanged { get; set; }
-    [Parameter] public EventCallback<WidgetInstance> OnDeleteWidget { get; set; }
-    [Parameter] public EventCallback<WidgetInstance> OnCopyWidget { get; set; }
+    [CascadingParameter] public BdfColumn bdfColumn { get; set; } = default!;
+    [CascadingParameter] public WidgetInstance Widget { get; set; } = default!;
+    [CascadingParameter] Column column { get; set; } = default!;
+    //[Parameter, EditorRequired] public WidgetInstance Widget { get; set; } = default!;
+    //[Parameter] public EventCallback<WidgetInstance> WidgetChanged { get; set; }
+    //[Parameter] public EventCallback<WidgetInstance> OnDeleteWidget { get; set; }
+    //[Parameter] public EventCallback<WidgetInstance> OnCopyWidget { get; set; }
 
     [Inject] public EditModeService editModeService { get; set; } = default!;
     [Inject] public WidgetTypeService widgetTypeService { get; set; } = default!;
 
-    private Dictionary<string, object>? widgetParameters;
+    //private Dictionary<string, object>? widgetParameters;
     private BdfWidgetConfigForm? bdfWidgetConfigForm;
     private WidgetType? widgetType;
+    private object? configObject;
+    private string? widgetInstanceId;
+
+    private bool HideHeader { get; set; }
+    private bool Collapsed { get; set; }
+    private bool HideWidget { get; set; }
 
     private DynamicComponent? dynamicComponentRef;
 
@@ -89,22 +95,72 @@
         base.OnInitialized();
     }
 
-    protected override async Task OnParametersSetAsync()
+    protected override void OnParametersSet()
     {
-        if (widgetType == null)
+        try
         {
-            widgetType = widgetTypeService.GetWidgetType(Widget.Type);
-            if (widgetType != null)
+            if (Widget != null && (widgetType == null || widgetType.Type != Widget.Type))
             {
+                widgetType = widgetTypeService.GetWidgetType(Widget.Type)
+                    ?? throw new Exception($"Unknown widget type: {Widget.Type}");
                 HideHeader = widgetType.HideHeader;
                 Collapsed = widgetType.Collapsed;
                 HideWidget = widgetType.HideWidget;
             }
         }
-        //if (widgetParameters == null)
-        await LoadWidgetParameters();
-        await base.OnParametersSetAsync();
+        catch (Exception ex)
+        {
+            Console.WriteLine($"In BdfWidget-OnParametersSet: {ex.InnerException?.Message ?? ex.Message}");
+        }
+        finally
+        {
+            base.OnParametersSet();
+        }
+
     }
+
+    // protected override async Task OnParametersSetAsync()
+    // {
+    //     try
+    //     {
+    //         if (Widget != null) // && Widget.WidgetInstanceId != widgetInstanceId)
+    //         {
+    //             widgetInstanceId = Widget.WidgetInstanceId;
+    //             widgetType = widgetTypeService.GetWidgetType(Widget.Type);
+    //             if (widgetType != null)
+    //             {
+    //                 HideHeader = widgetType.HideHeader;
+    //                 Collapsed = widgetType.Collapsed;
+    //                 HideWidget = widgetType.HideWidget;
+    //             }
+    //             LoadWidgetConfig();
+    //             StateHasChanged();
+    //         }
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine(ex.InnerException?.Message ?? ex.Message);
+    //     }
+    //     finally
+    //     {
+    //         await base.OnParametersSetAsync();
+    //     }
+
+
+    //     // if (widgetType == null)
+    //     // {
+    //     //     widgetType = widgetTypeService.GetWidgetType(Widget.Type);
+    //     //     if (widgetType != null)
+    //     //     {
+    //     //         HideHeader = widgetType.HideHeader;
+    //     //         Collapsed = widgetType.Collapsed;
+    //     //         HideWidget = widgetType.HideWidget;
+    //     //     }
+    //     // }
+    //     // //if (widgetParameters == null)
+    //     // await LoadWidgetParameters();
+    //     // await base.OnParametersSetAsync();
+    // }
     // protected override void OnParametersSet()
     // {
     //     if (widgetType == null)
@@ -122,77 +178,117 @@
     //     base.OnParametersSet();
     // }
 
-    private async void OnWidgetInstanceChanged(WidgetInstance widgetInstance)
-    {
-        Widget = widgetInstance;
-        await LoadWidgetParameters();
-    }
+    // private async void OnWidgetInstanceChanged(WidgetInstance widgetInstance)
+    // {
+    //     Widget = widgetInstance;
+    //     await LoadWidgetParameters();
+    // }
 
-    private async Task LoadWidgetParameters()
-    {
-        try
-        {
-            if (Widget == null || widgetType == null)
-                return;
-            widgetParameters = new Dictionary<string, object>();
-            var config = widgetType.GetConfig(Widget?.Config);
-            if (config != null)
-                widgetParameters.Add("Config", config);
-            await InvokeAsync(() => StateHasChanged());
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-        }
-    }
+    // public void LoadWidgetConfig()
+    // {
+    //     try
+    //     {
+    //         if (Widget == null || widgetType == null)
+    //             return;
+    //         //widgetParameters = new Dictionary<string, object>();
+    //         configObject = widgetType.GetConfig(Widget.Config);
+    //         // if (config != null)
+    //         //     widgetParameters.Add("Config", config);
+    //         StateHasChanged();
+    //         //await InvokeAsync(() => StateHasChanged());
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine(ex.ToString());
+    //     }
+    // }
 
-    private bool hideWidget;
-    public bool HideWidget
-    {
-        get => hideWidget;
-        set 
-        {
-            if (hideWidget != value)
-            {
-                hideWidget = value;
-                StateHasChanged();
-            }
-        }
-    }
+    // public bool HideWidget
+    // {
+    //     get;
+    //     set
+    //     {
+    //         if (field != value)
+    //         {
+    //             field = value;
+    //             StateHasChanged();
+    //         }
+    //     }
+    // }
 
-    private bool collapsed;
-    public bool Collapsed
-    {
-        get => collapsed;
-        set
-        {
-            if (collapsed != value)
-            {
-                collapsed = value;
-                StateHasChanged();
-            }
-        }
-    }
+    // private bool hideWidget;
+    // public bool HideWidget
+    // {
+    //     get => hideWidget;
+    //     set 
+    //     {
+    //         if (hideWidget != value)
+    //         {
+    //             hideWidget = value;
+    //             StateHasChanged();
+    //         }
+    //     }
+    // }
 
-    private bool hideHeader;
-    public bool HideHeader
-    {
-        get => hideHeader;
-        set 
-        {
-            if (hideHeader != value)
-            {
-                hideHeader = value;
-                StateHasChanged();
-            }
-        }
-    }
+    // public bool Collapsed
+    // {
+    //     get;
+    //     set
+    //     {
+    //         if (field != value)
+    //         {
+    //             field = value;
+    //             StateHasChanged();
+    //         }
+    //     }
+    // }
 
-    private async Task WidgetInstanceChanged(WidgetInstance widgetInstance)
-    {
-        await LoadWidgetParameters();
-        await InvokeAsync(() => StateHasChanged());
-    }
+    // private bool collapsed;
+    // public bool Collapsed
+    // {
+    //     get => collapsed;
+    //     set
+    //     {
+    //         if (collapsed != value)
+    //         {
+    //             collapsed = value;
+    //             StateHasChanged();
+    //         }
+    //     }
+    // }
+
+    // public bool HideHeader
+    // {
+    //     get;
+    //     set
+    //     {
+    //         if (field != value)
+    //         {
+    //             field = value;
+    //             StateHasChanged();
+    //         }
+    //     }
+    // }
+
+    // private bool hideHeader;
+    // public bool HideHeader
+    // {
+    //     get => hideHeader;
+    //     set 
+    //     {
+    //         if (hideHeader != value)
+    //         {
+    //             hideHeader = value;
+    //             StateHasChanged();
+    //         }
+    //     }
+    // }
+
+    // private async Task WidgetInstanceChanged(WidgetInstance widgetInstance)
+    // {
+    //     await LoadWidgetConfig();
+    //     await InvokeAsync(() => StateHasChanged());
+    // }
 
 
     private async void OnEditModeChanged(object? sender, EventArgs e)
@@ -200,18 +296,18 @@
         await InvokeAsync(() => StateHasChanged());
     }
 
-    private async Task ReloadWidgetContent()
-    {
-        try
-        {
-            await Task.Delay(0);
-            throw new NotImplementedException();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"{nameof(ReloadWidgetContent)}: {ex}");
-        }
-    }
+    // private async Task ReloadWidgetContent()
+    // {
+    //     try
+    //     {
+    //         await Task.Delay(0);
+    //         throw new NotImplementedException();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         Console.WriteLine($"{nameof(ReloadWidgetContent)}: {ex}");
+    //     }
+    // }
 
     public void ExpandCollapseWidget()
     {
@@ -221,14 +317,19 @@
     public async Task EditWidgetConfiguration()
     {
         if (bdfWidgetConfigForm != null)
+        {
             await bdfWidgetConfigForm.Open();
+        }
+        
     }
 
     public async Task RemoveWidget()
     {
         try
         {
-            await OnDeleteWidget.InvokeAsync(Widget);
+            column.Widgets.Remove(Widget);
+            await bdfColumn.StateChanged();
+            //await OnDeleteWidget.InvokeAsync(Widget);
         }
         catch (Exception ex)
         {
@@ -240,7 +341,16 @@
     {
         try
         {
-            await OnCopyWidget.InvokeAsync(Widget);
+            var index = column.Widgets.IndexOf(Widget);
+            var copy = Widget.DeepCopy();
+            if (copy != null)
+            {
+                copy.WidgetInstanceId = Guid.NewGuid().ToString();
+                column.Widgets.Insert(index, copy);
+                await bdfColumn.StateChanged();
+            }
+            //bdfColumn.CopyWidgetInstance()
+            //await OnCopyWidget.InvokeAsync(Widget);
         }
         catch (Exception ex)
         {

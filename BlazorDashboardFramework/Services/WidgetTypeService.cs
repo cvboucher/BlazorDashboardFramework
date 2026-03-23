@@ -9,6 +9,8 @@ namespace BlazorDashboardFramework.Services
 {
     public class WidgetTypeService
     {
+
+        
         public static Dictionary<string, WidgetType> WidgetTypes { get; } = new()
         {
             {
@@ -46,13 +48,13 @@ namespace BlazorDashboardFramework.Services
             return WidgetTypes.Values.FirstOrDefault(x => type.Equals(x.Type, StringComparison.OrdinalIgnoreCase));
         }
 
-        public object? GetWidgetInstanceConfig(string type, string? configJson)
-        {
-            var widgetType = GetWidgetType(type);
-            if (widgetType == null)
-                return null;
-            return widgetType.GetConfig(configJson);
-        }
+        //public object? GetWidgetInstanceConfig(string type, string? configJson)
+        //{
+        //    var widgetType = GetWidgetType(type);
+        //    if (widgetType == null)
+        //        return null;
+        //    return widgetType.GetConfig(configJson);
+        //}
 
     }
 }

@@ -45,6 +45,7 @@
         modalClass = "show";
         showBackdrop = true;
         await OnOpen.InvokeAsync();
+        StateHasChanged();
     }
 
     public async Task Close()
@@ -53,5 +54,6 @@
         modalClass = string.Empty;
         showBackdrop = false;
         await OnClose.InvokeAsync();
+        StateHasChanged();
     }
 }

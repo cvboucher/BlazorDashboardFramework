@@ -1,11 +1,29 @@
-﻿@foreach (var row in Rows)
+﻿@if (rows != null)
 {
-    <div class="row @row.StyleClass">
-        <BdfColumns @bind-Columns="row.Columns" />
-    </div>
+    @foreach (var row in rows)
+    {
+        <div class="@($"row {row.StyleClass}")">
+            <CascadingValue Value="row">
+                <CascadingValue Value="this">
+                    <BdfColumns />
+                </CascadingValue>
+            </CascadingValue>
+        </div>
+    }
 }
 
+
 @code {
-    [Parameter, EditorRequired] public List<Row> Rows { get; set; } = default!;
-    [Parameter] public EventCallback<List<Row>> RowsChanged { get; set; } = default!;
+    [CascadingParameter] Dashboard dashboard { get; set; } = default!;
+    [CascadingParameter] BdfDashboard bdfDashboard { get; set; } = default!;
+    [CascadingParameter] List<Row> rows { get; set; } = default!;
+    // [Parameter, EditorRequired] public List<Row> Rows { get; set; } = default!;
+    // [Parameter] public EventCallback<List<Row>> RowsChanged { get; set; } = default!;
+    // @bind-Columns="row.Columns"
+
+    protected override void OnParametersSet()
+    {
+        StateHasChanged();
+        base.OnParametersSet();
+    }
 }
