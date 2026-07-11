@@ -1,6 +1,8 @@
 ﻿@using System.Collections.Generic
 @using System.Diagnostics.CodeAnalysis
 
+@implements IAsyncDisposable
+
 @inject IJSRuntime JS
 
 @typeparam T
@@ -55,14 +57,15 @@
     public bool ForceFallback { get; set; } = true;
 
     private DotNetObjectReference<SortableList<T>>? selfReference;
+    private IJSObjectReference? module;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             selfReference = DotNetObjectReference.Create(this);
-            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/BlazorDashboardFramework/SortableList.razor.js");
-            await module.InvokeAsync<string>("init", Id, Group, Pull, Put, Sort, Handle, Filter, selfReference, ForceFallback);
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/BlazorDashboardFramework/SortableList.razor.js");
+            await module.InvokeVoidAsync("init", Id, Group, Pull, Put, Sort, Handle, Filter, selfReference, ForceFallback);
         }
     }
 
@@ -91,5 +94,23 @@
     }
 
 
-    public void Dispose() => selfReference?.Dispose();
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (module != null)
+            {
+                await module.InvokeVoidAsync("destroy", Id);
+                await module.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // The browser session is already gone, so there is no JS instance left to clean up.
+        }
+        finally
+        {
+            selfReference?.Dispose();
+        }
+    }
 }

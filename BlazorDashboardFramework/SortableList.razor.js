@@ -1,5 +1,14 @@
-﻿export function init(id, group, pull, put, sort, handle, filter, component, forceFallback) {
-    var sortable = new Sortable(document.getElementById(id), {
+const sortableInstances = new Map();
+
+export function init(id, group, pull, put, sort, handle, filter, component, forceFallback) {
+    destroy(id);
+
+    const element = document.getElementById(id);
+    if (!element) {
+        return;
+    }
+
+    const sortable = new Sortable(element, {
         animation: 200,
         group: {
             name: group,
@@ -31,4 +40,16 @@
             component.invokeMethodAsync('OnRemoveJS', event.oldDraggableIndex, event.newDraggableIndex, event.from.id, event.to.id);
         }
     });
+
+    sortableInstances.set(id, sortable);
+}
+
+export function destroy(id) {
+    const sortable = sortableInstances.get(id);
+    if (!sortable) {
+        return;
+    }
+
+    sortable.destroy();
+    sortableInstances.delete(id);
 }
