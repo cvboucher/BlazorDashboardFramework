@@ -12,8 +12,9 @@
                 <ValidationSummary />
                 <div class="mb-3">
                     <label class="form-label">Title</label>
-                    <InputText @bind-Value=@WidgetInstance.Title
+                    <InputText @bind-Value=@formModel.Title
                                class="form-control" />
+                    <ValidationMessage For="() => formModel.Title" />
                 </div>
                 @if (widgetType != null && widgetType.EditComponent != null )
                 {
@@ -40,6 +41,14 @@
     //private WidgetType? widgetType;
     //private object? configObject;
     private Dictionary<string, object> parameters = new();
+    private FormModel formModel = new();
+
+    // Edits are made on copies (title and typed config) so Cancel discards them.
+    private class FormModel
+    {
+        [System.ComponentModel.DataAnnotations.Required]
+        public string? Title { get; set; }
+    }
 
     public async Task Open()
     {
@@ -55,6 +64,7 @@
 
     private async Task OnValidSubmitClicked()
     {
+        WidgetInstance.Title = formModel.Title ?? string.Empty;
         if (parameters.ContainsKey("Config"))
         {
             var configObject = parameters["Config"];
@@ -76,6 +86,8 @@
         // }
         //await WidgetInstanceChanged.InvokeAsync(WidgetInstance);
         await Close();
+        if (bdfWidget != null)
+            await bdfWidget.NotifyChanged();
     }
 
     private async Task OnCancelClicked()
@@ -88,7 +100,8 @@
         await Task.Delay(0);
         try
         {
-            editContext = new EditContext(WidgetInstance);
+            formModel = new FormModel() { Title = WidgetInstance.Title };
+            editContext = new EditContext(formModel);
             parameters = new();
             if (widgetType.ConfigType != null)
             {
