@@ -1,5 +1,5 @@
 ﻿.layout-preview .column {
-    border: 1px dashed #ccc;
+    border: 1px dashed var(--bs-border-color, #ccc);
     height: 100%;
-    background-color: #eee;
+    background-color: var(--bs-tertiary-bg, #eee);
 }
