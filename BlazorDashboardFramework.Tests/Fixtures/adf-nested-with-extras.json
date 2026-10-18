@@ -1,0 +1,59 @@
+{
+  "title": "Nested",
+  "structure": "3-9 (12/4-4-4)",
+  "titleTemplateUrl": null,
+  "editable": true,
+  "$$hashKey": "object:1",
+  "rows": [
+    {
+      "$$hashKey": "object:20",
+      "styleClass": "my-row",
+      "columns": [
+        {
+          "styleClass": "col-md-3",
+          "cid": 1543612345678,
+          "$$hashKey": "object:25",
+          "widgets": [
+            {
+              "type": "clock",
+              "title": "Clock",
+              "wid": 1543612345679,
+              "$$hashKey": "object:40",
+              "styleClass": "panel-info",
+              "frameless": false,
+              "titleTemplateUrl": "./src/templates/widget-title.html",
+              "editTemplateUrl": "./src/templates/widget-edit.html",
+              "config": { "timePattern": "HH:mm:ss", "datePattern": "YYYY-MM-DD" }
+            },
+            {
+              "type": "linklist",
+              "title": "Links",
+              "wid": "1543612345678-4",
+              "config": { "links": [ { "title": "PieceCounter", "href": "https://www.piececounter.com" } ] }
+            },
+            {
+              "type": "iframe",
+              "title": "Frame",
+              "wid": "1543612345678-5",
+              "config": "{\"url\":\"https://example.com\",\"height\":\"420px\"}"
+            }
+          ]
+        },
+        {
+          "styleClass": "col-md-9",
+          "cid": "1543612345678-2",
+          "rows": [
+            { "columns": [ { "styleClass": "col-md-12", "cid": "1543612345678-6" } ] },
+            {
+              "columns": [
+                { "styleClass": "col-md-4", "cid": "1543612345678-7", "widgets": null },
+                { "cid": "1543612345678-8", "widgets": [ { "type": "pieceCounter.workSessions", "wid": "w-no-title", "config": { "primaryMetricDecimalPlaces": null, "maxRows": "10", "maxWidth": 250.5, "minValue": 0 } } ] },
+                { "styleClass": "col-md-4", "cid": "1543612345678-9", "rows": null }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
