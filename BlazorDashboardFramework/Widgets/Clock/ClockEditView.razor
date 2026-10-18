@@ -1,14 +1,25 @@
 ﻿<div class="mb-3">
-    <label class="form-label">Format</label>
-    <InputText @bind-Value="@Config.Format" class="form-control" />
+    <label class="form-label" for="clockTimePattern">Time pattern</label>
+    <InputText @bind-Value="@Config.TimePattern" class="form-control" id="clockTimePattern" />
+    <div class="form-text">Preview: @Preview(Config.TimePattern)</div>
 </div>
+<div class="mb-3">
+    <label class="form-label" for="clockDatePattern">Date pattern</label>
+    <InputText @bind-Value="@Config.DatePattern" class="form-control" id="clockDatePattern" />
+    <div class="form-text">Preview: @Preview(Config.DatePattern)</div>
+</div>
+<p class="text-info small">
+    Patterns use the
+    <a target="_blank" rel="noopener" href="https://momentjs.com/docs/#/displaying/format/">moment.js format tokens</a>,
+    e.g. <code>HH:mm:ss</code>, <code>h:mm A</code>, <code>dddd, MMMM D YYYY</code>. Put literal text in [brackets].
+</p>
 <div class="mb-3 form-check">
-    <InputCheckbox @bind-Value="@Config.HideHeader" class="form-check-input" id="hideHeadercheckbox" />
+    <InputCheckbox @bind-Value="@Config.HideHeader" class="form-check-input" id="hideHeaderCheckbox" />
     <label class="form-check-label" for="hideHeaderCheckbox">Hide Header</label>
 </div>
 
 @code {
     [Parameter] public ClockConfig Config { get; set; } = default!;
-    // [CascadingParameter(Name = "Config")] public object ConfigObject { get; set; } = default!;
-    // public ClockConfig Config => (ClockConfig)ConfigObject;
+
+    private static string Preview(string? pattern) => MomentFormatter.Format(DateTime.Now, pattern);
 }

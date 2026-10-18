@@ -1,22 +1,21 @@
 ﻿@implements IDisposable
-<div class="text-center fs-2">@GetClockString()</div>
+<div class="bdf-clock text-center">
+    <div class="bdf-clock-time">@GetTimeString()</div>
+    @if (!string.IsNullOrWhiteSpace(dateString))
+    {
+        <div class="bdf-clock-date">@dateString</div>
+    }
+</div>
 @code {
     [CascadingParameter] public BdfWidget bdfWidget { get; set; } = default!;
     [CascadingParameter] public WidgetInstance WidgetInstance { get; set; } = default!;
     [CascadingParameter] public WidgetType widgetType { get; set; } = default!;
-    //[Parameter] public ClockConfig Config { get; set; } = default!;
-    //[CascadingParameter(Name = "Config")] public object ConfigObject { get; set; } = default!;
-    // public ClockConfig Config => ConfigObject is ClockConfig 
-    //     ? (ClockConfig)ConfigObject
-    //     : new ClockConfig();
 
     [Inject] ClockWidgetService clockWidgetService { get; set; } = default!;
-    //[Inject] WidgetTypeService widgetTypeService { get; set; } = default!;
     [Inject] public EditModeService editModeService { get; set; } = default!;
 
-    //private bool ranOnce;
-
     private ClockConfig? Config;
+    private string? dateString;
 
     protected override void OnInitialized()
     {
@@ -28,48 +27,10 @@
 
     protected override void OnParametersSet()
     {
-        try
-        {
-            if (Config == null)
-            {
-                LoadConfig();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in ClockDisplayView OnParametersSetAsync: {ex}");
-        }
-        finally
-        {
-            base.OnParametersSet();
-        }
-        
+        if (Config == null)
+            LoadConfig();
+        base.OnParametersSet();
     }
-
-    // protected override async Task OnParametersSetAsync()
-    // {
-    //     try
-    //     {
-    //         if (Config == null)
-    //         {
-    //             LoadConfig();
-    //         }
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine($"Error in ClockDisplayView OnParametersSetAsync: {ex}");
-    //     }
-    //     finally
-    //     {
-            
-    //     }
-    //     // if (bdfWidget != null && Config.HideHeader != bdfWidget.HideHeader)
-    //     // {
-    //     //     bdfWidget.HideHeader = Config.HideHeader;
-    //     //     await InvokeAsync(() => StateHasChanged());
-    //     // }
-    //     // await base.OnParametersSetAsync();
-    // }
 
     private void LoadConfig()
     {
@@ -79,40 +40,41 @@
     private void WidgetInstance_OnConfigChanged(object? sender, EventArgs e)
     {
         LoadConfig();
-        InvokeAsync(() => StateHasChanged());
+        InvokeAsync(StateHasChanged);
     }
 
     private void EditModeService_OnEditModeChanged(object? sender, EventArgs e)
     {
         LoadConfig();
-        InvokeAsync(() => StateHasChanged());
+        InvokeAsync(StateHasChanged);
     }
 
-
-    private string GetClockFormat()
+    private string GetTimeString()
     {
-        return string.IsNullOrWhiteSpace(Config?.Format)
-            ? "T"
-            : Config.Format;
-    }
-
-    private string GetClockString()
-    {
+        var now = clockWidgetService.CurrentDateTime;
         try
         {
-            return clockWidgetService.CurrentDateTime.ToString(GetClockFormat());
+            dateString = Config?.DatePattern == null
+                ? MomentFormatter.Format(now, ClockConfig.DefaultDatePattern)
+                : MomentFormatter.Format(now, Config.DatePattern);
+            // Clocks saved by earlier versions of this framework used a .NET format string.
+            if (!string.IsNullOrWhiteSpace(Config?.Format) && Config.TimePattern == ClockConfig.DefaultTimePattern)
+                return now.ToString(Config.Format);
+            return MomentFormatter.Format(now, string.IsNullOrWhiteSpace(Config?.TimePattern)
+                ? ClockConfig.DefaultTimePattern
+                : Config.TimePattern);
         }
-        catch (Exception)
+        catch (FormatException)
         {
-            return clockWidgetService.CurrentDateTime.ToString("T");
+            return now.ToString("T");
         }
     }
 
     private async void ClockWidgetService_OnCurrentDateTimeChanged(object? sender, DateTime e)
     {
-        await InvokeAsync(() => StateHasChanged());
+        await InvokeAsync(StateHasChanged);
     }
-      
+
     public void Dispose()
     {
         clockWidgetService.CurrentDateTimeChanged -= ClockWidgetService_OnCurrentDateTimeChanged;
