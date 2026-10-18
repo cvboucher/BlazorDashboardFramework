@@ -45,7 +45,11 @@
                     }
                     else
                     {
-                        <h1>@Widget.Type</h1>
+                        <div class="bdf-unsupported-widget text-muted text-center small py-3">
+                            <i class="bi bi-puzzle"></i>
+                            This widget type (<code>@Widget.Type</code>) isn't supported.
+                            Its settings are kept.
+                        </div>
                     }
                 </div>
             </div>
@@ -101,11 +105,13 @@
         {
             if (Widget != null && (widgetType == null || widgetType.Type != Widget.Type))
             {
-                widgetType = widgetTypeService.GetWidgetType(Widget.Type)
-                    ?? throw new Exception($"Unknown widget type: {Widget.Type}");
-                HideHeader = widgetType.HideHeader;
-                Collapsed = widgetType.Collapsed;
-                HideWidget = widgetType.HideWidget;
+                widgetType = widgetTypeService.GetWidgetType(Widget.Type);
+                if (widgetType != null)
+                {
+                    HideHeader = widgetType.HideHeader;
+                    Collapsed = widgetType.Collapsed;
+                    HideWidget = widgetType.HideWidget;
+                }
             }
         }
         catch (Exception ex)

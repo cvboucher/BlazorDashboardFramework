@@ -22,8 +22,8 @@ namespace BlazorDashboardFramework
 
         public static T? DeepCopy<T>(this T self)
         {
-            var serialized = JsonSerializer.Serialize(self);
-            return JsonSerializer.Deserialize<T>(serialized);
+            var serialized = JsonSerializer.Serialize(self, BdfJson.DashboardOptions);
+            return JsonSerializer.Deserialize<T>(serialized, BdfJson.DashboardOptions);
         }
 
         public static string SerializeWithCamelCase<T>(this T data)

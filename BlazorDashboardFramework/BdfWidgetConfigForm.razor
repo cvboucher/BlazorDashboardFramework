@@ -60,11 +60,8 @@
             var configObject = parameters["Config"];
             if (configObject != null)
             {
-                WidgetInstance.Config = JsonSerializer.SerializeToElement(configObject, new JsonSerializerOptions()
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
-                WidgetInstance.OnConfigChanged();
+                // Merge over the stored config so settings this widget doesn't model are kept.
+                WidgetInstance.SetConfig(configObject);
                 //bdfWidget.LoadWidgetConfig();
             }
         }

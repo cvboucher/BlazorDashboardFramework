@@ -116,7 +116,7 @@
     public void CancelChanges()
     {
         if (!string.IsNullOrWhiteSpace(dashboardJson))
-            Value = JsonSerializer.Deserialize<Dashboard>(dashboardJson)
+            Value = Dashboard.FromJson(dashboardJson)
                 ?? new Dashboard() { Title = "Dashboard" };
         //await ValueChanged.InvokeAsync(Value);
         editModeService.EditMode = false;
@@ -127,7 +127,7 @@
     {
         //await Task.Delay(0);
         if (Value != null)
-            dashboardJson = JsonSerializer.Serialize(Value);
+            dashboardJson = Value.ToJson();
         editModeService.EditMode = true;
     }
        

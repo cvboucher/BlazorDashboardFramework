@@ -11,14 +11,38 @@ namespace BlazorDashboardFramework
     public class Dashboard
     {
         //public string DashboardId { get; set; } = Guid.NewGuid().ToString();
+        private List<Row> rows = new();
+
         [JsonPropertyName("structure")]
         public string Layout { get; set; } = "6-6";
         [JsonPropertyName("title")]
         public string? Title { get; set; }
         [JsonPropertyName("rows")]
-        public List<Row> Rows { get; set; } = new();
+        public List<Row> Rows
+        {
+            get => rows;
+            set => rows = value ?? new();
+        }
         [JsonPropertyName("titleTemplateUrl")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? TitleTemplateUrl { get; set; }
+
+        /// <summary>Unknown properties (e.g. ADF's $$hashKey, editable) preserved on round-trip.</summary>
+        [JsonExtensionData]
+        public Dictionary<string, JsonElement>? ExtensionData { get; set; }
+
+        /// <summary>Load a dashboard saved by this framework or by angular-dashboard-framework.</summary>
+        public static Dashboard? FromJson(string? json) => BdfJson.DeserializeDashboard(json);
+
+        public string ToJson() => BdfJson.SerializeDashboard(this);
+
+        /// <summary>All widgets in the dashboard, in layout order.</summary>
+        public IEnumerable<WidgetInstance> EnumerateWidgets()
+        {
+            foreach (var list in GetAllWidgets())
+                foreach (var widget in list)
+                    yield return widget;
+        }
 
 
         //public void MoveWidget(int oldIndex, int newIndex, string fromId, string toId)

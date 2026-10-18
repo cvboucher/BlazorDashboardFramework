@@ -30,7 +30,11 @@ namespace BlazorDashboardFramework
                 //Config = this.Config
             };
             if (this.ConfigType != null)
-                widget.Config = JsonSerializer.SerializeToElement(widget.GetConfig(this.ConfigType));
+            {
+                var config = Activator.CreateInstance(this.ConfigType);
+                if (config != null)
+                    widget.Config = JsonSerializer.SerializeToElement(config, this.ConfigType, BdfJson.ConfigWriteOptions);
+            }
             return widget;
         }
 
