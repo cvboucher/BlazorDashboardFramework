@@ -1,285 +1,87 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-
-namespace BlazorDashboardFramework.Services
+﻿namespace BlazorDashboardFramework.Services
 {
+    /// <summary>
+    /// Dashboard layouts ("structures"). Names and style classes match the original
+    /// angular-dashboard-framework app (adf-structures-base.js and adf-structures-pieceCounter.js)
+    /// so the "structure" value stored in old dashboards resolves to the same layout.
+    /// </summary>
     public class StructureService
     {
+        public const string DefaultStructureName = "3-9 (12/4-4-4)";
 
         public Dictionary<string, Dashboard> Structures { get; } = new();
 
         public StructureService()
         {
-            Structures.Add(SixSixStructure.Title, SixSixStructure);
-            Structures.Add(FourEightStructure.Title, FourEightStructure);
-            Structures.Add(TwelveFourFourFourStructure.Title, TwelveFourFourFourStructure);
-            Structures.Add(TwelveSixSixStructure.Title, TwelveSixSixStructure);
-            Structures.Add(TwelveSixSixTwelveStructure.Title, TwelveSixSixTwelveStructure);
-            Structures.Add(ThreeNineTwelveSixsixStructure.Title, ThreeNineTwelveSixsixStructure);
-            Structures.Add(TwelveThreeThreeThreeThreeStructure.Title, TwelveThreeThreeThreeThreeStructure);
-            Structures.Add(ThreeNineTwelveFourFourFourStructure.Title, ThreeNineTwelveFourFourFourStructure);
-            Structures.Add(TwelveThreeSixThreeTwelveStructure.Title, TwelveThreeSixThreeTwelveStructure);
+            // angular-dashboard-framework base structures
+            Add("6-6", R(C("col-md-6"), C("col-md-6")));
+            Add("4-8", R(C("col-md-4"), C("col-md-8")));
+            Add("12/4-4-4", R(C("col-md-12")), R(C("col-md-4"), C("col-md-4"), C("col-md-4")));
+            Add("12/6-6", R(C("col-md-12")), R(C("col-md-6"), C("col-md-6")));
+            Add("12/6-6/12", R(C("col-md-12")), R(C("col-md-6"), C("col-md-6")), R(C("col-md-12")));
+            Add("3-9 (12/6-6)", R(C("col-md-3"), C("col-md-9", R(C("col-md-12")), R(C("col-md-6"), C("col-md-6")))));
+
+            // PieceCounter structures
+            Add("12/3-3-3-3", R(C("col-md-12")), R(C("col-md-3"), C("col-md-3"), C("col-md-3"), C("col-md-3")));
+            Add("3-9 (12/4-4-4)", R(C("col-md-3"), C("col-md-9", R(C("col-md-12")), R(C("col-md-4"), C("col-md-4"), C("col-md-4")))));
+            Add("12/3-6-3/12", R(C("col-md-12")), R(C("col-md-3"), C("col-md-6"), C("col-md-3")), R(C("col-md-12")));
+            Add("12/6-6/4-4-4/3-3-3-3/2-2-2-2-2-2",
+                R(C("col-md-12")),
+                R(C("col-md-6"), C("col-md-6")),
+                R(C("col-md-4"), C("col-md-4"), C("col-md-4")),
+                R(C("col-md-3"), C("col-md-3"), C("col-md-3"), C("col-md-3")),
+                R(C("col-md-2"), C("col-md-2"), C("col-md-2"), C("col-md-2"), C("col-md-2"), C("col-md-2")));
+            Add("2-10 (12/6-6/4-4-4/3-3-3-3)",
+                R(C("col-sm-2"), C("col-sm-10",
+                    R(C("col-sm-12")),
+                    R(C("col-sm-6"), C("col-sm-6")),
+                    R(C("col-sm-4"), C("col-sm-4"), C("col-sm-4")),
+                    R(C("col-sm-3"), C("col-sm-3"), C("col-sm-3"), C("col-sm-3")))));
+            Add("3-9 (12/3-3-3-3)", R(C("col-md-3"), C("col-md-9", R(C("col-md-12")), R(C("col-md-3"), C("col-md-3"), C("col-md-3"), C("col-md-3")))));
         }
 
+        /// <summary>A fresh copy of the default layout for new dashboards.</summary>
         public Dashboard GetDefaultLayout()
         {
-            var layout = ThreeNineTwelveFourFourFourStructure?.DeepCopy() ??
-                throw new Exception("Default layout not found.");
-            //layout.Title = null;
-            return layout;
+            return GetLayout(DefaultStructureName)
+                ?? throw new Exception("Default layout not found.");
         }
 
         public Dashboard? GetFirstOrDefault()
         {
-            var layout = Structures.Values.FirstOrDefault()?.DeepCopy();
-            //if (layout != null)
-            //    layout.Title = null;
+            var name = Structures.Keys.FirstOrDefault();
+            return name == null ? null : GetLayout(name);
+        }
+
+        /// <summary>
+        /// A fresh copy of the named layout (case-insensitive), with <see cref="Dashboard.Layout"/> set
+        /// to the structure name and new column ids. Null if the name is unknown.
+        /// </summary>
+        public Dashboard? GetLayout(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return null;
+            var match = Structures.FirstOrDefault(x => name.Equals(x.Key, StringComparison.OrdinalIgnoreCase));
+            if (match.Value == null)
+                return null;
+            var layout = match.Value.DeepCopy()
+                ?? throw new Exception($"Unable to copy layout {name}.");
+            layout.Layout = match.Key;
+            layout.Title = match.Key;
+            layout.RegenerateIds();
             return layout;
         }
 
-        public Dashboard? GetLayout(string title)
+        public bool Contains(string? name)
+            => !string.IsNullOrWhiteSpace(name) && Structures.Keys.Any(x => name.Equals(x, StringComparison.OrdinalIgnoreCase));
+
+        private void Add(string name, params Row[] rows)
         {
-            var layout = Structures.Values
-                .FirstOrDefault(x => title.Equals(x.Title, StringComparison.OrdinalIgnoreCase))?
-                .DeepCopy();
-            //if (layout != null)
-            //    layout.Title = null;
-            return layout;
+            Structures.Add(name, new Dashboard() { Title = name, Layout = name, Rows = rows.ToList() });
         }
 
-        private Dashboard SixSixStructure = new Dashboard()
-        {
-            Title = "6-6",
-            Rows = new List<Row>() {
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-6" },
-                        new Column() { StyleClass = "col-md-6" }
-                    }
-                }
-            }
-        };
+        private static Row R(params Column[] columns) => new() { Columns = columns.ToList() };
 
-        private Dashboard FourEightStructure = new Dashboard()
-        {
-            Title = "4-8",
-            Rows = new List<Row>() {
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-4" },
-                        new Column() { StyleClass = "col-md-8" }
-                    }
-                }
-            }
-        };
-
-        private Dashboard TwelveFourFourFourStructure = new Dashboard()
-        {
-            Title = "12/4-4-4",
-            Rows = new List<Row>() {
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-12" }
-                    }
-                },
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-4" },
-                        new Column() { StyleClass = "col-md-4" },
-                        new Column() { StyleClass = "col-md-4" }
-                    }
-                }
-            }
-        };
-
-        private Dashboard TwelveSixSixStructure = new Dashboard()
-        {
-            Title = "12/6-6",
-            Rows = new List<Row>() {
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-12" }
-                    }
-                },
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-6" },
-                        new Column() { StyleClass = "col-md-6" }
-                    }
-                }
-            }
-        };
-
-        private Dashboard TwelveSixSixTwelveStructure = new Dashboard()
-        {
-            Title = "12/6-6/12",
-            Rows = new List<Row>() {
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-12" }
-                    }
-                },
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-6" },
-                        new Column() { StyleClass = "col-md-6" }
-                    }
-                },
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-12" }
-                    }
-                }
-            }
-        };
-
-        private Dashboard ThreeNineTwelveSixsixStructure = new Dashboard()
-        {
-            Title = "3-9 (12/6-6)",
-            Rows = new List<Row>() {
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-3" },
-                        new Column()
-                        {
-                            StyleClass = "col-md-9",
-                            Rows = new List<Row>
-                            {
-                                new Row()
-                                {
-                                    Columns = new List<Column>()
-                                    {
-                                        new Column() { StyleClass = "col-md-12"}
-                                    }
-                                },
-                                new Row()
-                                {
-                                    Columns = new List<Column>()
-                                    {
-                                        new Column() { StyleClass = "col-md-6"},
-                                        new Column() { StyleClass = "col-md-6"}
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        };
-
-        private Dashboard TwelveThreeThreeThreeThreeStructure = new Dashboard()
-        {
-            Title = "12/3-3-3-3",
-            Rows = new List<Row>() {
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-12" }
-                    }
-                },
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-3" },
-                        new Column() { StyleClass = "col-md-3" },
-                        new Column() { StyleClass = "col-md-3" },
-                        new Column() { StyleClass = "col-md-3" }
-                    }
-                }
-            }
-        };
-
-        private Dashboard ThreeNineTwelveFourFourFourStructure = new Dashboard()
-        {
-            Title = "3-9 (12/4-4-4)",
-            Rows = new List<Row>() {
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-3" },
-                        new Column()
-                        {
-                            StyleClass = "col-md-9",
-                            Rows = new List<Row>
-                            {
-                                new Row()
-                                {
-                                    Columns = new List<Column>()
-                                    {
-                                        new Column() { StyleClass = "col-md-12"}
-                                    }
-                                },
-                                new Row()
-                                {
-                                    Columns = new List<Column>()
-                                    {
-                                        new Column() { StyleClass = "col-md-4"},
-                                        new Column() { StyleClass = "col-md-4"},
-                                        new Column() { StyleClass = "col-md-4"}
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        };
-
-        private Dashboard TwelveThreeSixThreeTwelveStructure = new Dashboard()
-        {
-            Title = "12/3-6-3/12",
-            Rows = new List<Row>() {
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-12" }
-                    }
-                },
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-3" },
-                        new Column() { StyleClass = "col-md-6" },
-                        new Column() { StyleClass = "col-md-3" }
-                    }
-                },
-                new Row()
-                {
-                    Columns = new List<Column>()
-                    {
-                        new Column() { StyleClass = "col-md-12" }
-                    }
-                }
-            }
-        };
+        private static Column C(string styleClass, params Row[] rows) => new() { StyleClass = styleClass, Rows = rows.ToList() };
     }
 }
