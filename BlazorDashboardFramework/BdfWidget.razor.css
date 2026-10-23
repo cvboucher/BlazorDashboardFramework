@@ -11,3 +11,6 @@
     --bs-btn-padding-x: .4rem;
     --bs-btn-font-size: .7rem;
 }
+.bdf-widget-fullscreen {
+    height: 100%;
+}

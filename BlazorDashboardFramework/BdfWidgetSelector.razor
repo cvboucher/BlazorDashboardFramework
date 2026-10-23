@@ -1,18 +1,25 @@
 ﻿<BootstrapModal @ref="@modalDialog" 
                 Title="Add New Widget">
     <BodyContent>
-        <div class="list-group">
-            @foreach (var widget in WidgetTypeService.WidgetTypes.Values.OrderBy(x => x.Title).ToList())
-            {
-                <button type="button" class="list-group-item list-group-item-action" @onclick="() => SelectWidget(widget)">
-                    <h3>@widget.Title</h3>
-                    @if (!string.IsNullOrWhiteSpace(widget.Description))
-                    {
-                        <p>@widget.Description</p>
-                    }
-                </button>
-            }
-        </div>
+        @foreach (var category in WidgetTypeService.WidgetTypes.Values
+            .GroupBy(x => string.IsNullOrWhiteSpace(x.Category) ? MiscellaneousCategory : x.Category)
+            .OrderBy(x => x.Key == MiscellaneousCategory)
+            .ThenBy(x => x.Key))
+        {
+            <h6 class="mt-2 text-uppercase text-muted">@category.Key</h6>
+            <div class="list-group mb-3">
+                @foreach (var widget in category.OrderBy(x => x.Title))
+                {
+                    <button type="button" class="list-group-item list-group-item-action" @onclick="() => SelectWidget(widget)">
+                        <h5 class="mb-1">@widget.Title</h5>
+                        @if (!string.IsNullOrWhiteSpace(widget.Description))
+                        {
+                            <p class="mb-0 small">@widget.Description</p>
+                        }
+                    </button>
+                }
+            </div>
+        }
     </BodyContent>
 </BootstrapModal>
 
@@ -22,6 +29,7 @@
 
     [Parameter] public EventCallback<WidgetType> WidgetTypeSelected { get; set; }
 
+    private const string MiscellaneousCategory = "Miscellaneous";
     private BootstrapModal modalDialog { get; set; } = default!;
 
     public async Task Open()

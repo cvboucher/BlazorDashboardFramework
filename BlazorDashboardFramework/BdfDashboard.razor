@@ -51,9 +51,16 @@
     [Parameter] public EventCallback<Dashboard> OnDashboardSaved { get; set; }
     [Parameter] public EventCallback<Dashboard> OnDashboardDeleted { get; set; }
     [Parameter] public string? DefaultLayout { get; set; }
+    /// <summary>Ask for confirmation before deleting the dashboard or removing a widget (ADF enableConfirmDelete).</summary>
+    [Parameter] public bool ConfirmDelete { get; set; } = true;
+    /// <summary>Open a new widget's configuration dialog as soon as it is added (ADF edit.immediate).</summary>
+    [Parameter] public bool EditNewWidgets { get; set; } = true;
 
     [Inject] public EditModeService editModeService { get; set; } = default!;
     [Inject] public StructureService layoutService { get; set; } = default!;
+    [Inject] public IJSRuntime JS { get; set; } = default!;
+
+    private string? pendingConfigWidgetId;
 
     private BdfDashboardForm? bdfDashboardForm { get; set; }
     private BdfWidgetSelector? bdfWidgetSelector { get; set; }
@@ -93,7 +100,38 @@
     (WidgetType widgetType)
     {
         await Task.Delay(0);
-        Value?.FindFirstColumn()?.Widgets.Insert(0, widgetType.GetInstance());
+        var column = Value?.FindFirstColumn();
+        if (column == null)
+            return;
+        var widget = widgetType.GetInstance();
+        column.Widgets.Insert(0, widget);
+        if (EditNewWidgets && widgetType.EditComponent != null)
+            pendingConfigWidgetId = widget.WidgetInstanceId;
+        StateHasChanged();
+    }
+
+    /// <summary>True (once) if the widget was just added and its config dialog should open.</summary>
+    public bool TakePendingConfig(string widgetInstanceId)
+    {
+        if (pendingConfigWidgetId == null || pendingConfigWidgetId != widgetInstanceId)
+            return false;
+        pendingConfigWidgetId = null;
+        return true;
+    }
+
+    /// <summary>Browser confirm dialog; always true when <see cref="ConfirmDelete"/> is off.</summary>
+    public async Task<bool> ConfirmAsync(string message)
+    {
+        if (!ConfirmDelete)
+            return true;
+        try
+        {
+            return await JS.InvokeAsync<bool>("confirm", message);
+        }
+        catch (JSException)
+        {
+            return true;
+        }
     }
 
     public async Task EditDashboard()
@@ -110,13 +148,15 @@
 
     public async Task DeleteDashboard()
     {
+        if (!await ConfirmAsync($"Are you sure you want to delete the dashboard \"{Value?.Title}\"?"))
+            return;
         await OnDashboardDeleted.InvokeAsync(Value);
     }
 
     public void CancelChanges()
     {
         if (!string.IsNullOrWhiteSpace(dashboardJson))
-            Value = JsonSerializer.Deserialize<Dashboard>(dashboardJson)
+            Value = Dashboard.FromJson(dashboardJson)
                 ?? new Dashboard() { Title = "Dashboard" };
         //await ValueChanged.InvokeAsync(Value);
         editModeService.EditMode = false;
@@ -127,7 +167,7 @@
     {
         //await Task.Delay(0);
         if (Value != null)
-            dashboardJson = JsonSerializer.Serialize(Value);
+            dashboardJson = Value.ToJson();
         editModeService.EditMode = true;
     }
        

@@ -1,6 +1,6 @@
 ﻿::deep .column.edit {
     min-height: 120px;
-    border: 1px dashed #ccc;
+    border: 1px dashed var(--bs-border-color, #ccc);
     /*padding-top: 15px;*/
     border-radius: 5px;
 }

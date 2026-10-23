@@ -18,7 +18,7 @@ namespace BlazorDashboardFramework.Services
                 {
                     Type = "clock",
                     Title = "Clock",
-                    Description = "Displays the current time.",
+                    Description = "Displays date and time.",
                     DisplayComponent = typeof(Widgets.Clock.ClockDisplayView),
                     EditComponent = typeof(Widgets.Clock.ClockEditView),
                     ConfigType = typeof(Widgets.Clock.ClockConfig)

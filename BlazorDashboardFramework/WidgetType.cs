@@ -12,6 +12,8 @@ namespace BlazorDashboardFramework
         required public string Type { get; set; }
         required public string Title { get; set; }
         public string? Description { get; set; }
+        /// <summary>Group shown in the add-widget dialog (ADF categories). Null = "Miscellaneous".</summary>
+        public string? Category { get; set; }
         required public Type DisplayComponent { get; set; }
         public Type? EditComponent { get; set; }
         public Type? ConfigType { get; set; }
@@ -30,7 +32,11 @@ namespace BlazorDashboardFramework
                 //Config = this.Config
             };
             if (this.ConfigType != null)
-                widget.Config = JsonSerializer.SerializeToElement(widget.GetConfig(this.ConfigType));
+            {
+                var config = Activator.CreateInstance(this.ConfigType);
+                if (config != null)
+                    widget.Config = JsonSerializer.SerializeToElement(config, this.ConfigType, BdfJson.ConfigWriteOptions);
+            }
             return widget;
         }
 
