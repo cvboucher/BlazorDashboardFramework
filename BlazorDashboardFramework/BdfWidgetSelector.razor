@@ -1,7 +1,7 @@
 ﻿<BootstrapModal @ref="@modalDialog" 
                 Title="Add New Widget">
     <BodyContent>
-        @foreach (var category in WidgetTypeService.WidgetTypes.Values
+        @foreach (var category in WidgetTypeService.SelectableWidgetTypes()
             .GroupBy(x => string.IsNullOrWhiteSpace(x.Category) ? MiscellaneousCategory : x.Category)
             .OrderBy(x => x.Key == MiscellaneousCategory)
             .ThenBy(x => x.Key))
@@ -34,6 +34,7 @@
 
     public async Task Open()
     {
+        StateHasChanged(); // re-apply WidgetTypeService.SelectorFilter
         await modalDialog.Open();
     }
 
