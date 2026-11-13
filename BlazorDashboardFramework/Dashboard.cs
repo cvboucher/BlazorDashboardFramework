@@ -36,6 +36,22 @@ namespace BlazorDashboardFramework
 
         public string ToJson() => BdfJson.SerializeDashboard(this);
 
+        /// <summary>
+        /// Reads an app-defined flag kept in <see cref="ExtensionData"/> (e.g. ADF's hideDatesAndDeadlines),
+        /// so host apps can store per-dashboard options without changing this class. Missing or non-boolean = false.
+        /// </summary>
+        public bool GetExtensionFlag(string name) =>
+            ExtensionData != null
+            && ExtensionData.TryGetValue(name, out var value)
+            && value.ValueKind == JsonValueKind.True;
+
+        /// <summary>Writes an app-defined flag into <see cref="ExtensionData"/> (saved with the dashboard JSON).</summary>
+        public void SetExtensionFlag(string name, bool value)
+        {
+            ExtensionData ??= new Dictionary<string, JsonElement>();
+            ExtensionData[name] = JsonSerializer.SerializeToElement(value);
+        }
+
         /// <summary>All widgets in the dashboard, in layout order.</summary>
         public IEnumerable<WidgetInstance> EnumerateWidgets()
         {
