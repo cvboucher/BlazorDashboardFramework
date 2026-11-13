@@ -1,14 +1,19 @@
 ﻿@implements IDisposable
 <CascadingValue Value="@this">
     <CascadingValue Value="widgetType">
+    <CascadingValue Value="visibility" IsFixed="true">
         @if (!HideWidget || editModeService.EditMode)
         {
 
-            <div class="card mb-3">
+            <div class="@(visibility.IsHidden(editModeService.EditMode) ? "card mb-3 d-none" : "card mb-3")">
                 @if (!HideHeader || editModeService.EditMode)
                 {
                     <div class="card-header hover-container d-flex justify-content-between">
                         <h5>@Widget.Title</h5>
+                        @if (editModeService.EditMode && visibility.HiddenByWidget)
+                        {
+                            <span class="badge text-bg-secondary align-self-center ms-2 me-auto bdf-widget-self-hidden" title="This widget has hidden itself (for example, it has nothing to show). It is only visible in edit mode.">Hidden</span>
+                        }
 
                         <div class="float-end hover-effect fs-6">
                             @if (editModeService.EditMode)
@@ -74,6 +79,7 @@
             </BootstrapModal>
         }
     </CascadingValue>
+    </CascadingValue>
 </CascadingValue>
 @code {
     [CascadingParameter] public BdfColumn bdfColumn { get; set; } = default!;
@@ -95,6 +101,9 @@
     private bool HideHeader { get; set; }
     private bool Collapsed { get; set; }
     private bool HideWidget { get; set; }
+
+    // Opt-in self-hiding (see WidgetVisibility). Visible unless the widget calls SetHidden(true).
+    private readonly WidgetVisibility visibility = new();
 
     private DynamicComponent? dynamicComponentRef;
     private BootstrapModal? fullscreenModal;
@@ -131,8 +140,25 @@
         await base.OnAfterRenderAsync(firstRender);
     }
 
+    /// <summary>
+    /// True when the display component asked to be hidden via <see cref="SetHidden"/>.
+    /// Independent of <see cref="WidgetType.HideWidget"/>.
+    /// </summary>
+    public bool HiddenByWidget => visibility.HiddenByWidget;
+
+    /// <summary>
+    /// Lets the widget's display component hide its card (e.g. when it has nothing to show) and show it again.
+    /// Opt-in: widgets that never call this are unaffected. The component stays rendered while hidden,
+    /// so it can call <c>SetHidden(false)</c> later; in edit mode the card is always shown (with a "Hidden" badge).
+    /// Same as cascading <see cref="WidgetVisibility"/> and calling its <see cref="WidgetVisibility.SetHidden"/>.
+    /// </summary>
+    public void SetHidden(bool hidden) => visibility.SetHidden(hidden);
+
+    private void OnVisibilityChanged() => _ = InvokeAsync(StateHasChanged);
+
     protected override void OnInitialized()
     {
+        visibility.Changed += OnVisibilityChanged;
         editModeService.EditModeChanged += OnEditModeChanged;
         base.OnInitialized();
     }
@@ -407,6 +433,7 @@
 
     public void Dispose()
     {
+        visibility.Changed -= OnVisibilityChanged;
         editModeService.EditModeChanged -= OnEditModeChanged;
     }
 }

@@ -126,8 +126,29 @@ A display component receives cascading parameters:
     [CascadingParameter] public WidgetInstance WidgetInstance { get; set; } = default!;
     [CascadingParameter] public WidgetType widgetType { get; set; } = default!;
     [CascadingParameter] public BdfWidget bdfWidget { get; set; } = default!;
+    [CascadingParameter] public WidgetVisibility? WidgetVisibility { get; set; } // optional, see below
 }
 ```
+
+### Hiding a widget from its display component (optional)
+
+A widget can hide its own card, for example when it has nothing to show. This is opt-in: widgets that don't
+use it behave exactly as before, and `WidgetType.HideWidget` is unchanged.
+
+```razor
+@code {
+    [CascadingParameter] public WidgetVisibility? WidgetVisibility { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        items = await LoadItems();
+        WidgetVisibility?.SetHidden(!items.Any());   // or bdfWidget.SetHidden(...)
+    }
+}
+```
+
+- The display component stays rendered while hidden, so it can call `SetHidden(false)` when data arrives.
+- In edit mode the card is always shown, with a "Hidden" badge, so it can still be configured or removed.
 
 ### Widget config
 
