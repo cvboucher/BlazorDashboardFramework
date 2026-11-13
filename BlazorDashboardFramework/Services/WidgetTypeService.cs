@@ -43,6 +43,20 @@ namespace BlazorDashboardFramework.Services
 
         
 
+        /// <summary>
+        /// Optional: which widget types the "Add New Widget" dialog offers (for example, only those the user is allowed to use).
+        /// Null (the default) offers every registered type. Only the dialog is filtered: widgets already on a dashboard
+        /// still resolve through <see cref="GetWidgetType"/>.
+        /// </summary>
+        public static Func<WidgetType, bool>? SelectorFilter { get; set; }
+
+        /// <summary>The registered widget types the "Add New Widget" dialog offers (see <see cref="SelectorFilter"/>).</summary>
+        public static IEnumerable<WidgetType> SelectableWidgetTypes()
+        {
+            var filter = SelectorFilter;
+            return filter == null ? WidgetTypes.Values : WidgetTypes.Values.Where(filter);
+        }
+
         public WidgetType? GetWidgetType(string type)
         {
             return WidgetTypes.Values.FirstOrDefault(x => type.Equals(x.Type, StringComparison.OrdinalIgnoreCase));
