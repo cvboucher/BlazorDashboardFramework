@@ -58,14 +58,33 @@
 
     private DotNetObjectReference<SortableList<T>>? selfReference;
     private IJSObjectReference? module;
+    private bool disposed;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (!firstRender)
+            return;
+        selfReference = DotNetObjectReference.Create(this);
+        var imported = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/BlazorDashboardFramework/SortableList.razor.js");
+        // The list can be removed while the module is loading (e.g. edit mode turned off right after a dashboard switch).
+        // Initializing then would pass the disposed DotNetObjectReference to JS and throw an unhandled error.
+        if (disposed)
         {
-            selfReference = DotNetObjectReference.Create(this);
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./_content/BlazorDashboardFramework/SortableList.razor.js");
-            await module.InvokeVoidAsync("init", Id, Group, Pull, Put, Sort, Handle, Filter, selfReference, ForceFallback);
+            await DisposeModuleAsync(imported);
+            return;
+        }
+        module = imported;
+        await module.InvokeVoidAsync("init", Id, Group, Pull, Put, Sort, Handle, Filter, selfReference, ForceFallback);
+    }
+
+    private static async Task DisposeModuleAsync(IJSObjectReference imported)
+    {
+        try
+        {
+            await imported.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
         }
     }
 
@@ -96,6 +115,7 @@
 
     public async ValueTask DisposeAsync()
     {
+        disposed = true;
         try
         {
             if (module != null)
@@ -107,6 +127,11 @@
         catch (JSDisconnectedException)
         {
             // The browser session is already gone, so there is no JS instance left to clean up.
+        }
+        catch (JSException ex)
+        {
+            // Cleanup only; don't let a JS failure while tearing down the list surface as an unhandled error.
+            Console.WriteLine($"SortableList {Id} destroy failed: {ex.Message}");
         }
         finally
         {
