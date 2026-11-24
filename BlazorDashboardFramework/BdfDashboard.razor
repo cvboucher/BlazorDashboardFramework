@@ -19,6 +19,10 @@
             }
         </div>
     </div>
+    @if (HeaderContent != null && Value != null)
+    {
+        @HeaderContent(Value)
+    }
 </div>
 <div class="container-fluid">
     <CascadingValue Value="this">
@@ -34,7 +38,7 @@
 </div>
 @if (editModeService.EditMode)
 {
-    <BdfDashboardForm @bind-Dashboard="@Value" @ref="@bdfDashboardForm" />
+    <BdfDashboardForm @bind-Dashboard="@Value" @ref="@bdfDashboardForm" ExtraContent="@DashboardFormContent" />
     <BdfWidgetSelector @ref="@bdfWidgetSelector" WidgetTypeSelected="AddSelectedWidget" />
 }
 
@@ -55,6 +59,10 @@
     [Parameter] public bool ConfirmDelete { get; set; } = true;
     /// <summary>Open a new widget's configuration dialog as soon as it is added (ADF edit.immediate).</summary>
     [Parameter] public bool EditNewWidgets { get; set; } = true;
+    /// <summary>Optional content rendered under the dashboard title (e.g. host app banners). Null renders nothing.</summary>
+    [Parameter] public RenderFragment<Dashboard>? HeaderContent { get; set; }
+    /// <summary>Optional extra fields for the Edit Dashboard dialog (e.g. host app options kept in ExtensionData).</summary>
+    [Parameter] public RenderFragment<Dashboard>? DashboardFormContent { get; set; }
 
     [Inject] public EditModeService editModeService { get; set; } = default!;
     [Inject] public StructureService layoutService { get; set; } = default!;

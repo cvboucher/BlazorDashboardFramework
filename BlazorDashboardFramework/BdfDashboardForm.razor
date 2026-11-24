@@ -8,6 +8,10 @@
                 <label for="title" class="form-label">Dashboard Title</label>
                 <input type="text" class="form-control" id="title" aria-describedby="title" @bind-value="@Dashboard.Title">
             </div>
+            @if (ExtraContent != null)
+            {
+                <div class="mb-3">@ExtraContent(Dashboard)</div>
+            }
             <div class="row mb-3">
                 <InputRadioGroup Name="layout" @bind-Value="@Dashboard.Layout">
                     <label for="layout" class="form-label">Layout (@Dashboard.Layout)</label>
@@ -34,6 +38,8 @@
 @code {
     [Parameter, EditorRequired] public Dashboard Dashboard { get; set; } = default!;
     [Parameter] public EventCallback<Dashboard> DashboardChanged { get; set; } = default!;
+    /// <summary>Optional host-app fields shown under the title. Null renders nothing (unchanged dialog).</summary>
+    [Parameter] public RenderFragment<Dashboard>? ExtraContent { get; set; }
     
     [Inject] StructureService layoutService { get; set; } = default!;
     
